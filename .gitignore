@@ -1,0 +1,5 @@
+Debug/
+*.bak
+*.ncb
+*.suo
+LSActiveDesktop*.user
