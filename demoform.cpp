@@ -40,8 +40,6 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_CREATE:
 			hwebf = TWebf::create(hwnd, hInstance);
 
-				MessageBox(NULL, "Just created the webform", "WM_CREATE", MB_OK);
-
 			break;
 		case WM_SIZE:
 			MoveWindow(hwebf, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
@@ -65,59 +63,11 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			break;
 		}
-		/*case WM_DESTROY:
-			PostQuitMessage(0);
-
-			break;*/
 	}
 
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-/*extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR szPath)
-{
-	OleInitialize(0);
-	hWndParent = parentWnd;
-	hInstance = dllInst;
-
-	readSettings();
-
-	WNDCLASS wc;
-	memset(&wc, 0, sizeof(wc));
-	wc.lpfnWndProc = (WNDPROC)wndProc;
-	wc.hInstance = dllInst;
-	wc.lpszClassName = className;
-	wc.style = CS_NOCLOSE;
-	if (!RegisterClass(&wc))
-	{
-		reportError("Error registering tVolEzy window class");
-		return 1;
-	}
-
-	hWnd = CreateWindowEx(WS_EX_TOOLWINDOW, className, "", WS_CHILD,
-		0, 0, 0, 0, hWndParent, NULL, dllInst, NULL);
-	if (hWnd == NULL)
-	{
-		reportError("Error creating tVolEzy window");
-		UnregisterClass(className, dllInst);
-		return 1;
-	}
-
-	// Register our bangs with LiteStep
-	AddBangCommand("!LSActiveDesktopNavigate", bangNavigate);
-	AddBangCommand("!LSActiveDesktopBack", bangBack);
-	AddBangCommand("!LSActiveDesktopForward", bangForward);
-	AddBangCommand("!LSActiveDesktopRefresh", bangRefresh);
-	AddBangCommand("!LSActiveDesktopRefreshCache", bangRefreshCache);
-
-	// Register message for version info
-	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
-	SendMessage(GetLitestepWnd(), LM_REGISTERMESSAGE, (WPARAM)hWnd, (LPARAM)msgs);
-
-	return 0;
-}*/
-
-//int WINAPI WinMain(HINSTANCE h, HINSTANCE, LPSTR, int)
 extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR szPath)
 {
 	hInstance = dllInst;
@@ -139,7 +89,6 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 	wcex.hIconSm = NULL;
 
 	if (!RegisterClassEx(&wcex)) {
-		//MessageBox(NULL, _T("Failed to register class"), _T("Error"), MB_OK);
 		reportError("Error registering LSActiveDesktop window class");
 		return 1;
 	}
@@ -156,8 +105,6 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 		CW_USEDEFAULT, CW_USEDEFAULT, 400, 400, GetLitestepWnd(), NULL, hInstance, NULL);
 
 	if (hMain == NULL) {
-		/*MessageBox(NULL, _T("Failed to create window"), _T("Error"), MB_OK);
-		return 0;*/
 		reportError("Error creating LSActiveDesktop window");
 		UnregisterClass(className, dllInst);
 		return 1;
@@ -177,17 +124,6 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 	SendMessage(GetLitestepWnd(), LM_REGISTERMESSAGE, (WPARAM)hMain, (LPARAM)msgs);
 
 	return 0;
-/*
-	MSG msg;
-	while (GetMessage(&msg, NULL, 0, 0)) {
-		TranslateMessage(&msg);
-		DispatchMessage(&msg);
-	}
-
-	OleUninitialize();
-	return (int)msg.wParam;*/
-
-	MessageBox(NULL, "End of initModuleEx", "initModuleEx", MB_OK);
 }
 
 void __cdecl bangNavigate(HWND caller, const char* args)

@@ -143,25 +143,12 @@ void TCharToWide(const wchar_t *src, wchar_t *dst, int dst_size_in_wchars)
 	wcscpy(dst, src);
 }
 
-/*void WideToTChar(const wchar_t *src, char *dst, int dst_size_in_tchars)
-{
-	WideCharToMultiByte(CP_ACP, 0, src, -1, dst, dst_size_in_tchars, NULL, NULL);
-}
-
-void WideToTChar(const wchar_t *src, wchar_t *dst, int dst_size_in_tchars)
-{
-	#pragma warning(suppress:4996)
-	wcscpy(dst, src);
-}
-*/
-
 void TWebf::Go(const TCHAR *url)
 {
 	if (url == NULL) {
 		return;
 	}
 
-	// Navigate to the new one and delete the old one
 	wchar_t ws[MAX_PATH];
 	TCharToWide(url, ws, MAX_PATH);
 	isnaving = 7;
@@ -169,7 +156,6 @@ void TWebf::Go(const TCHAR *url)
 	v.vt = VT_I4;
 	v.lVal = 0; // v.lVal = navNoHistory;
 	ibrowser->Navigate(ws, &v, NULL, NULL, NULL);
-	// nb. the events know not to bother us for currentlynav.
 
 	// (Special case: maybe it's already loaded by the time we get here!)
 	if ((isnaving & 2) == 0) {
@@ -238,13 +224,12 @@ LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 {
 	if (msg == WM_CREATE) {
 		TWebf *webf = new TWebf(hwnd);
-		MessageBox(NULL, "Just created the TWebf object", "WM_CREATE", MB_OK);
 		if (webf->ibrowser == 0) {
-			MessageBox(NULL, "web->ibrowser is NULL", "WM_CREATE", MB_OK);
+			MessageBox(NULL, "web->ibrowser is NULL", "WM_CREATE", MB_OK | MB_ICONERROR);
 			delete webf;
-			webf = NULL;
+
+			return DefWindowProc(hwnd, msg, wParam, lParam);
 		} else {
-			MessageBox(NULL, "AddRef", "WM_CREATE", MB_OK);
 			webf->AddRef();
 		}
 
@@ -257,8 +242,6 @@ LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		}
 
 		if (cs->lpszName != 0 && cs->lpszName[0] != 0) {
-			MessageBox(NULL, "Navigating to initial URL", "WM_CREATE", MB_OK);
-
 			webf->Go(cs->lpszName);
 		}
 
@@ -300,10 +283,8 @@ HWND TWebf::create(HWND hWndParent, HINSTANCE hInstance)
 	wcex.lpszClassName = WEBFORM_CLASS;
 
 	if(!RegisterClassEx(&wcex)) {
-		MessageBox(NULL, "Could not auto register the webform", "TWebformAutoRegister()", MB_OK);
+		MessageBox(NULL, "Could not auto register the webform", "TWebf::create", MB_OK);
 	}
-
-	MessageBox(NULL, "AutoReg", "AutoReg", MB_OK);
 
 	HWND hwebf = CreateWindow(
 		WEBFORM_CLASS,
@@ -313,16 +294,3 @@ HWND TWebf::create(HWND hWndParent, HINSTANCE hInstance)
 
 	return hwebf;
 }
-
-/*struct TWebformAutoRegister {
-	TWebformAutoRegister()
-	{
-		WNDCLASSEX wcex = {0};
-		wcex.cbSize = sizeof(WNDCLASSEX);
-		wcex.style = CS_HREDRAW | CS_VREDRAW;
-		wcex.lpfnWndProc = (WNDPROC)WebformWndProc;
-		wcex.hInstance = GetModuleHandle(NULL);
-		wcex.lpszClassName = WEBFORM_CLASS;
-		RegisterClassEx(&wcex);
-	}
-} WebformAutoRegister;*/
