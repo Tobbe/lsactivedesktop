@@ -49,6 +49,7 @@ public:
 
 	TWebf(HWND hhost);
 	~TWebf();
+	static HWND create(HWND hWndParent, HINSTANCE hInstance);
 	void CloseThread();
 	void Close();
 	void Go(const TCHAR *fn);

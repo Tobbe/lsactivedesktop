@@ -38,11 +38,7 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			return 0;
 		case WM_CREATE:
-			hwebf = CreateWindow(
-				WEBFORM_CLASS,
-				_T("http://tlundberg.com"),
-				WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | WS_VSCROLL | WS_HSCROLL,
-				0, 0, 100, 100, hwnd, (HMENU)103, hInstance, 0);
+			hwebf = TWebf::create(hwnd, hInstance);
 
 				MessageBox(NULL, "Just created the webform", "WM_CREATE", MB_OK);
 

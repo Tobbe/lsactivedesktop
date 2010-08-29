@@ -236,7 +236,6 @@ ULONG STDMETHODCALLTYPE TWebf::Release()
 
 LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	MessageBox(NULL, "WebformWndProc", "WebformWndProc", MB_OK);
 	if (msg == WM_CREATE) {
 		TWebf *webf = new TWebf(hwnd);
 		MessageBox(NULL, "Just created the TWebf object", "WM_CREATE", MB_OK);
@@ -291,7 +290,31 @@ LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-struct TWebformAutoRegister {
+HWND TWebf::create(HWND hWndParent, HINSTANCE hInstance)
+{
+	WNDCLASSEX wcex = {0};
+	wcex.cbSize = sizeof(WNDCLASSEX);
+	wcex.style = CS_HREDRAW | CS_VREDRAW;
+	wcex.lpfnWndProc = (WNDPROC)WebformWndProc;
+	wcex.hInstance = hInstance;
+	wcex.lpszClassName = WEBFORM_CLASS;
+
+	if(!RegisterClassEx(&wcex)) {
+		MessageBox(NULL, "Could not auto register the webform", "TWebformAutoRegister()", MB_OK);
+	}
+
+	MessageBox(NULL, "AutoReg", "AutoReg", MB_OK);
+
+	HWND hwebf = CreateWindow(
+		WEBFORM_CLASS,
+		_T("http://tlundberg.com"),
+		WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | WS_VSCROLL,
+		0, 0, 100, 100, hWndParent, (HMENU)103, hInstance, 0);
+
+	return hwebf;
+}
+
+/*struct TWebformAutoRegister {
 	TWebformAutoRegister()
 	{
 		WNDCLASSEX wcex = {0};
@@ -300,11 +323,6 @@ struct TWebformAutoRegister {
 		wcex.lpfnWndProc = (WNDPROC)WebformWndProc;
 		wcex.hInstance = GetModuleHandle(NULL);
 		wcex.lpszClassName = WEBFORM_CLASS;
-
-		if(!RegisterClassEx(&wcex)) {
-			MessageBox(NULL, "Could not auto register the webform", "TWebformAutoRegister()", MB_OK);
-		}
-
-		MessageBox(NULL, "AutoReg", "AutoReg", MB_OK);
+		RegisterClassEx(&wcex);
 	}
-} WebformAutoRegister;
+} WebformAutoRegister;*/
