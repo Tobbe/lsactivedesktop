@@ -49,7 +49,7 @@ public:
 
 	TWebf(HWND hhost);
 	~TWebf();
-	static HWND create(HWND hWndParent, HINSTANCE hInstance);
+	static HWND create(HWND hWndParent, HINSTANCE hInstance, bool showScrollbars);
 	void CloseThread();
 	void Close();
 	void Go(const TCHAR *fn);

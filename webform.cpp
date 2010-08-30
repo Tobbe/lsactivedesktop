@@ -241,6 +241,10 @@ LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 			SetWindowLongPtr(hwnd, GWL_STYLE, cs->style & ~(WS_HSCROLL | WS_VSCROLL));
 		}
 
+		/*if (webf->hasScrollbars) {
+			SetWindowLongPtr(hwnd, GWL_STYLE, cs->style | (WS_HSCROLL | WS_VSCROLL));
+		}*/
+
 		if (cs->lpszName != 0 && cs->lpszName[0] != 0) {
 			webf->Go(cs->lpszName);
 		}
@@ -273,7 +277,7 @@ LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 	return DefWindowProc(hwnd, msg, wParam, lParam);
 }
 
-HWND TWebf::create(HWND hWndParent, HINSTANCE hInstance)
+HWND TWebf::create(HWND hWndParent, HINSTANCE hInstance, bool showScrollbars)
 {
 	WNDCLASSEX wcex = {0};
 	wcex.cbSize = sizeof(WNDCLASSEX);
@@ -286,10 +290,12 @@ HWND TWebf::create(HWND hWndParent, HINSTANCE hInstance)
 		MessageBox(NULL, "Could not auto register the webform", "TWebf::create", MB_OK);
 	}
 
+	DWORD scrollbarStyle = (showScrollbars ? WS_VSCROLL | WS_HSCROLL : 0);
+
 	HWND hwebf = CreateWindow(
 		WEBFORM_CLASS,
 		_T("http://tlundberg.com"),
-		WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | WS_VSCROLL,
+		WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | scrollbarStyle,
 		0, 0, 100, 100, hWndParent, (HMENU)103, hInstance, 0);
 
 	return hwebf;

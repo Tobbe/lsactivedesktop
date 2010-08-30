@@ -38,7 +38,7 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			return 0;
 		case WM_CREATE:
-			hwebf = TWebf::create(hwnd, hInstance);
+			hwebf = TWebf::create(hwnd, hInstance, settings.showScrollbars);
 
 			break;
 		case WM_SIZE:
@@ -101,8 +101,8 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 		parent = parentWnd;
 	}
 
-	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-		CW_USEDEFAULT, CW_USEDEFAULT, 400, 400, GetLitestepWnd(), NULL, hInstance, NULL);
+	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), WS_POPUP | WS_CLIPCHILDREN,
+		200, 300, 1300, 600, GetLitestepWnd(), NULL, hInstance, NULL);
 
 	if (hMain == NULL) {
 		reportError("Error creating LSActiveDesktop window");
