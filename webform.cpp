@@ -220,9 +220,21 @@ ULONG STDMETHODCALLTYPE TWebf::Release()
 	return tmp;
 }
 
-LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK TWebf::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	/*if (msg == WM_NCCREATE) {
+		TWebf *webf = (TWebf*)((LPCREATESTRUCT(lParam))->lpCreateParams);
+		webf->Close();
+		webf->Release();
+
+		//#pragma warning(suppress:4244)
+		//SetWindowLongPtr(hwnd, 0, (LONG_PTR)webf);
+
+		return DefWindowProc(hwnd, msg, wParam, lParam);
+	}*/
+
 	if (msg == WM_CREATE) {
+		/*
 		TWebf *webf = new TWebf(hwnd);
 		if (webf->ibrowser == 0) {
 			MessageBox(NULL, "web->ibrowser is NULL", "WM_CREATE", MB_OK | MB_ICONERROR);
@@ -232,6 +244,10 @@ LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		} else {
 			webf->AddRef();
 		}
+		*/
+
+		TWebf *webf = (TWebf*)((LPCREATESTRUCT(lParam))->lpCreateParams);
+		webf->hWnd = hwnd;
 
 		#pragma warning(suppress:4244)
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)webf);
@@ -259,22 +275,27 @@ LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lPara
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 
+	return webf->InstanceWndProc(msg, wParam, lParam);
+}
+
+LRESULT TWebf::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
+{
 	switch (msg) {
 		case WM_DESTROY:
-			webf->Close();
-			webf->Release();
-			SetWindowLongPtr(hwnd, GWLP_USERDATA, 0);
+			Close();
+			Release();
+			SetWindowLongPtr(hWnd, GWLP_USERDATA, 0);
 			break;
 		case WM_SETTEXT:
-			webf->Go((TCHAR*)lParam);
+			Go((TCHAR*)lParam);
 			break;
 		case WM_SIZE:
-			webf->ibrowser->put_Width(LOWORD(lParam));
-			webf->ibrowser->put_Height(HIWORD(lParam));
+			ibrowser->put_Width(LOWORD(lParam));
+			ibrowser->put_Height(HIWORD(lParam));
 			break;
 	}
 
-	return DefWindowProc(hwnd, msg, wParam, lParam);
+	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
 HWND TWebf::create(HWND hWndParent, HINSTANCE hInstance, bool showScrollbars)
@@ -282,13 +303,27 @@ HWND TWebf::create(HWND hWndParent, HINSTANCE hInstance, bool showScrollbars)
 	WNDCLASSEX wcex = {0};
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style = CS_HREDRAW | CS_VREDRAW;
-	wcex.lpfnWndProc = (WNDPROC)WebformWndProc;
+	wcex.lpfnWndProc = (WNDPROC)TWebf::WebformWndProc;
 	wcex.hInstance = hInstance;
 	wcex.lpszClassName = WEBFORM_CLASS;
+	wcex.cbWndExtra = sizeof(TWebf*);
 
 	if(!RegisterClassEx(&wcex)) {
 		MessageBox(NULL, "Could not auto register the webform", "TWebf::create", MB_OK);
 	}
+
+	TWebf *webf = new TWebf(hWndParent);
+	if (webf->ibrowser == 0) {
+		MessageBox(NULL, "web->ibrowser is NULL", "WM_CREATE", MB_OK | MB_ICONERROR);
+		delete webf;
+
+		return NULL;
+	} else {
+		webf->AddRef();
+	}
+
+	/*webf->Close();
+	webf->Release();*/
 
 	DWORD scrollbarStyle = (showScrollbars ? WS_VSCROLL | WS_HSCROLL : 0);
 
@@ -296,7 +331,7 @@ HWND TWebf::create(HWND hWndParent, HINSTANCE hInstance, bool showScrollbars)
 		WEBFORM_CLASS,
 		_T("http://tlundberg.com"),
 		WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE | scrollbarStyle,
-		0, 0, 100, 100, hWndParent, (HMENU)103, hInstance, 0);
+		0, 0, 100, 100, hWndParent, (HMENU)103, hInstance, (LPVOID)webf);
 
 	return hwebf;
 }

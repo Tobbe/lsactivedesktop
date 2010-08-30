@@ -27,7 +27,7 @@ typedef std::basic_string<TCHAR> tstring;
 // This notification is sent via WM_COMMAND when you have called WebformGo(hWebF, url).
 // It indicates that the page has finished loading.
 
-class TWebf : public IUnknown {
+class TWebf/* : public IUnknown */{
 public:
 	long ref;
 	TOleClientSite clientsite;
@@ -38,6 +38,7 @@ public:
 	TDispatch dispatch;
 	unsigned int isnaving;    // bitmask: 4=haven't yet finished Navigate call, 2=haven't yet received DocumentComplete, 1=haven't yet received BeforeNavigate
 
+	HWND hWnd;
 	HWND hhost;               // This is the window that hosts us
 	IWebBrowser2 *ibrowser;   // Our pointer to the browser itself. Released in Close().
 	DWORD cookie;             // By this cookie shall the watcher be known
@@ -53,6 +54,8 @@ public:
 	void CloseThread();
 	void Close();
 	void Go(const TCHAR *fn);
+	static LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
 
 	// IUnknown
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppv);
