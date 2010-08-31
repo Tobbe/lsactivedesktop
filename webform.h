@@ -48,14 +48,15 @@ public:
 	TCHAR *kurl;              // Key\0Value\0Key2\0Value2\0\0 arguments for the url just clicked on
 	HANDLE hf;
 
-	TWebf(HWND hhost);
+	TWebf();
 	~TWebf();
-	static HWND create(HWND hWndParent, HINSTANCE hInstance, bool showScrollbars);
+	void create(HWND hWndParent, HINSTANCE hInstance, LONG_PTR id, UINT x, UINT y, bool showScrollbars);
 	void CloseThread();
 	void Close();
 	void Go(const TCHAR *fn);
 	static LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
+	void setupOle();
 
 	// IUnknown
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppv);

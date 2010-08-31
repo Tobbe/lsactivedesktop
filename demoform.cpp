@@ -15,6 +15,8 @@ LPCSTR revID = "LSActiveDesktop 0.1 by Tobbe";
 
 bool loaded;
 LSADSettings settings;
+TWebf *webForm;
+TWebf *webForm2;
 
 void __cdecl bangNavigate(HWND caller, const char* args);
 void reportError(LPCSTR msg);
@@ -38,11 +40,14 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			return 0;
 		case WM_CREATE:
-			hwebf = TWebf::create(hwnd, hInstance, settings.showScrollbars);
+			webForm->create(hwnd, hInstance, 103, 0, 0, settings.showScrollbars);
+			hwebf = webForm->hWnd;
+
+			webForm2->create(hwnd, hInstance, 104, 0, 300, settings.showScrollbars);
 
 			break;
 		case WM_SIZE:
-			MoveWindow(hwebf, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
+			//MoveWindow(hwebf, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
 
 			break;
 		case WM_PAINT: {
@@ -96,6 +101,8 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 	readSettings();
 
 	HWND parent = NULL;
+	webForm = new TWebf();
+	webForm2 = new TWebf();
 
 	if (parentWnd != NULL && parentWnd != GetLitestepWnd()) {
 		parent = parentWnd;
