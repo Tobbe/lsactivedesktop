@@ -4,23 +4,20 @@
 #include <windows.h>
 #include <mshtmhst.h>
 
-class TWebf;
-
 struct TDispatch : public IDispatch {
-	TWebf *webf;
-
 	// IUnknown
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppv);
-	ULONG STDMETHODCALLTYPE AddRef();
-	ULONG STDMETHODCALLTYPE Release();
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid,
+		void **ppv) = 0;
+	virtual ULONG STDMETHODCALLTYPE AddRef() = 0;
+	virtual ULONG STDMETHODCALLTYPE Release() = 0;
 
 	// IDispatch
-	HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo);
-	HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid,
+	virtual HRESULT STDMETHODCALLTYPE GetTypeInfoCount(UINT *pctinfo);
+	virtual HRESULT STDMETHODCALLTYPE GetTypeInfo(UINT iTInfo, LCID lcid,
 		ITypeInfo **ppTInfo);
-	HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid,
+	virtual HRESULT STDMETHODCALLTYPE GetIDsOfNames(REFIID riid,
 		LPOLESTR *rgszNames, UINT cNames, LCID lcid, DISPID *rgDispId);
-	HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid,
+	virtual HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid,
 		LCID lcid, WORD wFlags, DISPPARAMS *Params, VARIANT *pVarResult,
 		EXCEPINFO *pExcepInfo, UINT *puArgErr);
 };

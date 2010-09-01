@@ -1,48 +1,48 @@
 #include "toleclientsite.h"
-#include "webform.h"
+#include <crtdbg.h> // For _ASSERT()
 
-HRESULT STDMETHODCALLTYPE TOleClientSite::QueryInterface(REFIID riid, void **ppv)
-{
-	return webf->QueryInterface(riid, ppv);
-}
-
-ULONG STDMETHODCALLTYPE TOleClientSite::AddRef()
-{
-	return webf->AddRef();
-}
-
-ULONG STDMETHODCALLTYPE TOleClientSite::Release()
-{
-	return webf->Release();
-}
+#define NOTIMPLEMENTED _ASSERT(0); return E_NOTIMPL
 
 HRESULT STDMETHODCALLTYPE TOleClientSite::SaveObject()
 {
-	return E_NOTIMPL;
+	NOTIMPLEMENTED;
 }
 
-HRESULT STDMETHODCALLTYPE TOleClientSite::GetMoniker(DWORD dwAssign, DWORD dwWhichMoniker, IMoniker **ppmk)
+HRESULT STDMETHODCALLTYPE TOleClientSite::GetMoniker(DWORD dwAssign,
+	DWORD dwWhichMoniker, IMoniker **ppmk)
 {
-	return E_NOTIMPL;
+	NOTIMPLEMENTED;
 }
 
-HRESULT STDMETHODCALLTYPE TOleClientSite::GetContainer(IOleContainer **ppContainer)
+HRESULT STDMETHODCALLTYPE TOleClientSite::GetContainer(
+	IOleContainer **ppContainer)
 {
-	*ppContainer = 0;
+	// Retrieves a pointer to the object's container.
+	// Simple containers that do not support links to their embedded objects
+	// probably do not need to implement this method. Instead, they can return
+	// E_NOINTERFACE and set ppContainer to NULL.
+
+	*ppContainer = NULL;
 	return E_NOINTERFACE;
 }
 
 HRESULT STDMETHODCALLTYPE TOleClientSite::ShowObject()
 {
+	// This method is called when someone wants the web browser container to
+	// display its object to the user.
+	// A common reason this method is called is that someone called DoVerb with
+	// a verb that requires the web browser to be visible. One such verb is
+	// OLEIVERB_SHOW
+
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE TOleClientSite::OnShowWindow(BOOL fShow)
 {
-	return E_NOTIMPL;
+	NOTIMPLEMENTED;
 }
 
 HRESULT STDMETHODCALLTYPE TOleClientSite::RequestNewObjectLayout()
 {
-	return E_NOTIMPL;
+	NOTIMPLEMENTED;
 }

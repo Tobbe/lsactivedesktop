@@ -12,12 +12,6 @@ TWebf::TWebf() :
 	ref(1), ibrowser(NULL), cookie(0), isnaving(0), url(NULL), kurl(NULL),
 	hasScrollbars(false), hhost(NULL), hf(INVALID_HANDLE_VALUE)
 {
-	clientsite.webf = this;
-	site.webf = this;
-	frame.webf = this;
-	dispatch.webf = this;
-	uihandler.webf = this;
-	showui.webf = this;
 }
 
 void TWebf::setupOle()
@@ -32,7 +26,7 @@ void TWebf::setupOle()
 		return;
 	}
 
-	hr = iole->SetClientSite(&clientsite);
+	hr = iole->SetClientSite(this);
 	if (hr != S_OK) {
 		iole->Release();
 		return;
@@ -50,7 +44,7 @@ void TWebf::setupOle()
 		return;
 	}
 
-	hr = iole->DoVerb(OLEIVERB_SHOW, 0, &clientsite, 0, hhost, &rc);
+	hr = iole->DoVerb(OLEIVERB_SHOW, 0, this, 0, hhost, &rc);
 	if (hr != S_OK) {
 		iole->Release();
 		return;
@@ -64,7 +58,7 @@ void TWebf::setupOle()
 		cpc->FindConnectionPoint(DIID_DWebBrowserEvents2, &cp);
 
 		if (cp != 0) {
-			cp->Advise(&dispatch, &cookie);
+			cp->Advise(this, &cookie);
 			cp->Release();
 			connected = true;
 		}
@@ -179,18 +173,22 @@ HRESULT STDMETHODCALLTYPE TWebf::QueryInterface(REFIID riid, void **ppv)
 {
 	*ppv = NULL;
 
-	if (riid == IID_IUnknown) {
-		*ppv = this;
-	} else if (riid == IID_IOleClientSite) {
-		*ppv = &clientsite;
+	/*if (riid == IID_IUnknown) {
+		*ppv = static_cast<IUnknown*>(this);
+	} else */if (riid == IID_IUnknown || riid == IID_IOleClientSite) {
+		*ppv = static_cast<IOleClientSite*>(this); //&clientsite;
 	} else if (riid == IID_IOleWindow || riid == IID_IOleInPlaceSite) {
-		*ppv = &site;
-	} else if (riid == IID_IOleInPlaceUIWindow || riid == IID_IOleInPlaceFrame) {
-		*ppv = &frame;
+		*ppv = static_cast<IOleInPlaceSite*>(this);//&site;
+	} else if (riid == IID_IOleInPlaceUIWindow) {
+		*ppv = static_cast<IOleInPlaceUIWindow*>(this);//&frame;
+	} else if (riid == IID_IOleInPlaceFrame) {
+		*ppv = static_cast<IOleInPlaceFrame*>(this);//&frame;
 	} else if (riid == IID_IDispatch) {
-		*ppv = &dispatch;
+		*ppv = static_cast<IDispatch*>(this); //&dispatch;
 	} else if (riid == IID_IDocHostUIHandler) {
-		*ppv = &uihandler;
+		*ppv = static_cast<IDocHostUIHandler*>(this); //&uihandler;
+	} else if (riid == IID_IDocHostShowUI) {
+		*ppv = static_cast<IDocHostShowUI*>(this);
 	}
 
 	if (*ppv != NULL) {
@@ -320,4 +318,76 @@ void TWebf::create(HWND hWndParent, HINSTANCE hInstance, LONG_PTR id, UINT x, UI
 	setupOle();
 
 	Go("http://tlundberg.com");
+}
+
+HRESULT STDMETHODCALLTYPE TWebf::Invoke(DISPID dispIdMember, REFIID riid,
+	LCID lcid, WORD wFlags, DISPPARAMS *Params, VARIANT *pVarResult,
+	EXCEPINFO *pExcepInfo, UINT *puArgErr)
+{
+	switch (dispIdMember) { // DWebBrowserEvents2
+		case DISPID_BEFORENAVIGATE2:
+			break;
+		case DISPID_DOCUMENTCOMPLETE:
+			DocumentComplete(Params->rgvarg[0].pvarVal->bstrVal);
+			break;
+		case DISPID_AMBIENT_DLCONTROL:
+			pVarResult->vt = VT_I4;
+			pVarResult->lVal = DLCTL_DLIMAGES | DLCTL_VIDEOS | DLCTL_BGSOUNDS | DLCTL_SILENT;
+			break;
+		default:
+			return DISP_E_MEMBERNOTFOUND;
+	}
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE TWebf::GetHostInfo(DOCHOSTUIINFO *pInfo)
+{
+	pInfo->dwFlags = (hasScrollbars ? 0 : DOCHOSTUIFLAG_SCROLL_NO) | DOCHOSTUIFLAG_NO3DOUTERBORDER;
+	
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE TWebf::GetExternal(IDispatch **ppDispatch)
+{
+	*ppDispatch = static_cast<IDispatch*>(this);
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE TWebf::GetWindow(HWND *phwnd)
+{
+	*phwnd = hhost;
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE TWebf::GetWindowContext(IOleInPlaceFrame **ppFrame,
+	IOleInPlaceUIWindow **ppDoc, LPRECT lprcPosRect, LPRECT lprcClipRect,
+	LPOLEINPLACEFRAMEINFO info)
+{
+	*ppFrame = static_cast<IOleInPlaceFrame*>(this);
+	AddRef();
+	*ppDoc = NULL;
+	info->fMDIApp = FALSE;
+	info->hwndFrame = hhost;
+	info->haccel = 0;
+	info->cAccelEntries = 0;
+	GetClientRect(hhost, lprcPosRect);
+	GetClientRect(hhost, lprcClipRect);
+
+	return S_OK;
+}
+
+HRESULT STDMETHODCALLTYPE TWebf::OnPosRectChange(LPCRECT lprcPosRect)
+{
+	IOleInPlaceObject *iole = NULL;
+	ibrowser->QueryInterface(IID_IOleInPlaceObject, (void**)&iole);
+
+	if (iole != NULL) {
+		iole->SetObjectRects(lprcPosRect, lprcPosRect);
+		iole->Release();
+	}
+
+	return S_OK;
 }

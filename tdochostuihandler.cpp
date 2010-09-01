@@ -1,34 +1,29 @@
 #include "tdochostuihandler.h"
-#include "webform.h"
 
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::QueryInterface(REFIID riid, void **ppv)
-{
-	return webf->QueryInterface(riid, ppv);
-}
-
-ULONG STDMETHODCALLTYPE TDocHostUIHandler::AddRef()
-{
-	return webf->AddRef();
-}
-
-ULONG STDMETHODCALLTYPE TDocHostUIHandler::Release()
-{
-	return webf->Release();
-}
-
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::ShowContextMenu(DWORD dwID, POINT *ppt, IUnknown *pcmdtReserved, IDispatch *pdispReserved)
+HRESULT STDMETHODCALLTYPE TDocHostUIHandler::ShowContextMenu(DWORD dwID,
+	POINT *ppt, IUnknown *pcmdtReserved, IDispatch *pdispReserved)
 {
 	return S_OK;
 }
 
 HRESULT STDMETHODCALLTYPE TDocHostUIHandler::GetHostInfo(DOCHOSTUIINFO *pInfo)
 {
-	pInfo->dwFlags = (webf->hasScrollbars ? 0 : DOCHOSTUIFLAG_SCROLL_NO) | DOCHOSTUIFLAG_NO3DOUTERBORDER;
+	// Called at initialization of the browser object UI. We can set various
+	// features of the browser object here.
+	// We can do disable the 3D border (DOCHOSTUIFLAG_NO3DOUTERBORDER) and
+	// other things like hide the scroll bar (DOCHOSTUIFLAG_SCROLL_NO), display
+	// picture display (DOCHOSTUIFLAG_NOPICS), disable any script running when
+	// the page is loaded (DOCHOSTUIFLAG_DISABLE_SCRIPT_INACTIVE), open a site
+	// in a new browser window when the user clicks on some link
+	// (DOCHOSTUIFLAG_OPENNEWWIN), and lots of other things. See the MSDN docs
+	// on the DOCHOSTUIINFO struct passed to us.
 	
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::ShowUI(DWORD dwID, IOleInPlaceActiveObject *pActiveObject, IOleCommandTarget *pCommandTarget, IOleInPlaceFrame *pFrame, IOleInPlaceUIWindow *pDoc)
+HRESULT STDMETHODCALLTYPE TDocHostUIHandler::ShowUI(DWORD dwID,
+	IOleInPlaceActiveObject *pActiveObject, IOleCommandTarget *pCommandTarget,
+	IOleInPlaceFrame *pFrame, IOleInPlaceUIWindow *pDoc)
 {
 	return S_OK;
 }
@@ -53,59 +48,58 @@ HRESULT STDMETHODCALLTYPE TDocHostUIHandler::OnDocWindowActivate(BOOL fActivate)
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::OnFrameWindowActivate(BOOL fActivate)
+HRESULT STDMETHODCALLTYPE TDocHostUIHandler::OnFrameWindowActivate(
+	BOOL fActivate)
 {
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::ResizeBorder(LPCRECT prcBorder, IOleInPlaceUIWindow *pUIWindow, BOOL fRameWindow)
+HRESULT STDMETHODCALLTYPE TDocHostUIHandler::ResizeBorder(LPCRECT prcBorder,
+	IOleInPlaceUIWindow *pUIWindow, BOOL fRameWindow)
 {
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::TranslateAccelerator(LPMSG lpMsg, const GUID *pguidCmdGroup, DWORD nCmdID)
+HRESULT STDMETHODCALLTYPE TDocHostUIHandler::TranslateAccelerator(LPMSG lpMsg,
+	const GUID *pguidCmdGroup, DWORD nCmdID)
 {
 	return S_FALSE;
 }
 
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::GetOptionKeyPath(LPOLESTR *pchKey, DWORD dw)
+HRESULT STDMETHODCALLTYPE TDocHostUIHandler::GetOptionKeyPath(LPOLESTR *pchKey,
+	DWORD dw)
 {
 	return S_FALSE;
 }
 
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::GetDropTarget(IDropTarget *pDropTarget, IDropTarget **ppDropTarget)
+HRESULT STDMETHODCALLTYPE TDocHostUIHandler::GetDropTarget(
+	IDropTarget *pDropTarget, IDropTarget **ppDropTarget)
 {
 	return S_FALSE;
 }
 
 HRESULT STDMETHODCALLTYPE TDocHostUIHandler::GetExternal(IDispatch **ppDispatch)
 {
-	/*IWebBrowser2 *wb2 = webf->ibrowser;
+	// Gets the host's IDispatch interface.
+	// If the host exposes an automation interface, it can provide a reference
+	// to MSHTML through ppDispatch.
+	// If the method implementation does not supply an IDispatch, set
+	// ppDispatch to NULL, even if the method fails or returns S_FALSE.
 
-	if (wb2 == NULL) {
-		*ppDispatch = NULL;
-		return S_FALSE;
-	}
-
-	wb2->get_Application(ppDispatch);
-
-	if (ppDispatch == NULL) {
-		return S_FALSE;
-	}*/
-
-	*ppDispatch = &webf->dispatch;
-
-	return S_OK;
+	*ppDispatch = NULL;
+	return S_FALSE;
 }
 
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::TranslateUrl(DWORD dwTranslate, OLECHAR *pchURLIn, OLECHAR **ppchURLOut)
+HRESULT STDMETHODCALLTYPE TDocHostUIHandler::TranslateUrl(DWORD dwTranslate,
+	OLECHAR *pchURLIn, OLECHAR **ppchURLOut)
 {
 	*ppchURLOut = 0;
 
 	return S_FALSE;
 }
 
-HRESULT STDMETHODCALLTYPE TDocHostUIHandler::FilterDataObject(IDataObject *pDO, IDataObject **ppDORet)
+HRESULT STDMETHODCALLTYPE TDocHostUIHandler::FilterDataObject(IDataObject *pDO,
+	IDataObject **ppDORet)
 {
 	*ppDORet = 0;
 

@@ -6,33 +6,40 @@
 #include <mshtmdid.h>
 #include <exdispid.h>
 
-class TWebf;
-
 class TDocHostUIHandler : public IDocHostUIHandler {
 public:
-	TWebf *webf;
-
 	// IUnknown
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppv);
-	ULONG STDMETHODCALLTYPE AddRef();
-	ULONG STDMETHODCALLTYPE Release();
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid,
+		void **ppv) = 0;
+	virtual ULONG STDMETHODCALLTYPE AddRef() = 0;
+	virtual ULONG STDMETHODCALLTYPE Release() = 0;
 
 	// IDocHostUIHandler
-	HRESULT STDMETHODCALLTYPE ShowContextMenu(DWORD dwID, POINT *ppt, IUnknown *pcmdtReserved, IDispatch *pdispReserved);
-	HRESULT STDMETHODCALLTYPE GetHostInfo(DOCHOSTUIINFO *pInfo);
-	HRESULT STDMETHODCALLTYPE ShowUI(DWORD dwID, IOleInPlaceActiveObject *pActiveObject, IOleCommandTarget *pCommandTarget, IOleInPlaceFrame *pFrame, IOleInPlaceUIWindow *pDoc);
-	HRESULT STDMETHODCALLTYPE HideUI();
-	HRESULT STDMETHODCALLTYPE UpdateUI();
-	HRESULT STDMETHODCALLTYPE EnableModeless(BOOL fEnable);
-	HRESULT STDMETHODCALLTYPE OnDocWindowActivate(BOOL fActivate);
-	HRESULT STDMETHODCALLTYPE OnFrameWindowActivate(BOOL fActivate);
-	HRESULT STDMETHODCALLTYPE ResizeBorder(LPCRECT prcBorder, IOleInPlaceUIWindow *pUIWindow, BOOL fRameWindow);
-	HRESULT STDMETHODCALLTYPE TranslateAccelerator(LPMSG lpMsg, const GUID *pguidCmdGroup, DWORD nCmdID);
-	HRESULT STDMETHODCALLTYPE GetOptionKeyPath(LPOLESTR *pchKey, DWORD dw);
-	HRESULT STDMETHODCALLTYPE GetDropTarget(IDropTarget *pDropTarget, IDropTarget **ppDropTarget);
-	HRESULT STDMETHODCALLTYPE GetExternal(IDispatch **ppDispatch);
-	HRESULT STDMETHODCALLTYPE TranslateUrl(DWORD dwTranslate, OLECHAR *pchURLIn, OLECHAR **ppchURLOut);
-	HRESULT STDMETHODCALLTYPE FilterDataObject(IDataObject *pDO, IDataObject **ppDORet);
+	virtual HRESULT STDMETHODCALLTYPE ShowContextMenu(DWORD dwID, POINT *ppt,
+		IUnknown *pcmdtReserved, IDispatch *pdispReserved);
+	virtual HRESULT STDMETHODCALLTYPE GetHostInfo(DOCHOSTUIINFO *pInfo);
+	virtual HRESULT STDMETHODCALLTYPE ShowUI(DWORD dwID,
+		IOleInPlaceActiveObject *pActiveObject,
+		IOleCommandTarget *pCommandTarget, IOleInPlaceFrame *pFrame,
+		IOleInPlaceUIWindow *pDoc);
+	virtual HRESULT STDMETHODCALLTYPE HideUI();
+	virtual HRESULT STDMETHODCALLTYPE UpdateUI();
+	virtual HRESULT STDMETHODCALLTYPE EnableModeless(BOOL fEnable);
+	virtual HRESULT STDMETHODCALLTYPE OnDocWindowActivate(BOOL fActivate);
+	virtual HRESULT STDMETHODCALLTYPE OnFrameWindowActivate(BOOL fActivate);
+	virtual HRESULT STDMETHODCALLTYPE ResizeBorder(LPCRECT prcBorder,
+		IOleInPlaceUIWindow *pUIWindow, BOOL fRameWindow);
+	virtual HRESULT STDMETHODCALLTYPE TranslateAccelerator(LPMSG lpMsg,
+		const GUID *pguidCmdGroup, DWORD nCmdID);
+	virtual HRESULT STDMETHODCALLTYPE GetOptionKeyPath(LPOLESTR *pchKey,
+		DWORD dw);
+	virtual HRESULT STDMETHODCALLTYPE GetDropTarget(IDropTarget *pDropTarget,
+		IDropTarget **ppDropTarget);
+	virtual HRESULT STDMETHODCALLTYPE GetExternal(IDispatch **ppDispatch);
+	virtual HRESULT STDMETHODCALLTYPE TranslateUrl(DWORD dwTranslate,
+		OLECHAR *pchURLIn, OLECHAR **ppchURLOut);
+	virtual HRESULT STDMETHODCALLTYPE FilterDataObject(IDataObject *pDO,
+		IDataObject **ppDORet);
 };
 
 #endif

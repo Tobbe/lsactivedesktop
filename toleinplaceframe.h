@@ -3,37 +3,38 @@
 
 #include <windows.h>
 #include <mshtmhst.h>
-#include <mshtmdid.h>
-#include <exdispid.h>
-
-class TWebf;
 
 class TOleInPlaceFrame : public IOleInPlaceFrame {
 public:
-	TWebf *webf;
-
 	// IUnknown
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppv);
-	ULONG STDMETHODCALLTYPE AddRef();
-	ULONG STDMETHODCALLTYPE Release();
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid,
+		void **ppv) = 0;
+	virtual ULONG STDMETHODCALLTYPE AddRef() = 0;
+	virtual ULONG STDMETHODCALLTYPE Release() = 0;
 
 	// IOleWindow
-	HRESULT STDMETHODCALLTYPE GetWindow(HWND *phwnd);
-	HRESULT STDMETHODCALLTYPE ContextSensitiveHelp(BOOL fEnterMode);
+	virtual HRESULT STDMETHODCALLTYPE GetWindow(HWND *phwnd);
+	virtual HRESULT STDMETHODCALLTYPE ContextSensitiveHelp(BOOL fEnterMode);
 
 	// IOleInPlaceUIWindow
-	HRESULT STDMETHODCALLTYPE GetBorder(LPRECT lprectBorder);
-	HRESULT STDMETHODCALLTYPE RequestBorderSpace(LPCBORDERWIDTHS pborderwidths);
-	HRESULT STDMETHODCALLTYPE SetBorderSpace(LPCBORDERWIDTHS pborderwidths);
-	HRESULT STDMETHODCALLTYPE SetActiveObject(IOleInPlaceActiveObject *pActiveObject, LPCOLESTR pszObjName);
+	virtual HRESULT STDMETHODCALLTYPE GetBorder(LPRECT lprectBorder);
+	virtual HRESULT STDMETHODCALLTYPE RequestBorderSpace(
+		LPCBORDERWIDTHS pborderwidths);
+	virtual HRESULT STDMETHODCALLTYPE SetBorderSpace(
+		LPCBORDERWIDTHS pborderwidths);
+	virtual HRESULT STDMETHODCALLTYPE SetActiveObject(
+		IOleInPlaceActiveObject *pActiveObject, LPCOLESTR pszObjName);
 
 	// IOleInPlaceFrame
-	HRESULT STDMETHODCALLTYPE InsertMenus(HMENU hmenuShared, LPOLEMENUGROUPWIDTHS lpMenuWidths);
-	HRESULT STDMETHODCALLTYPE SetMenu(HMENU hmenuShared, HOLEMENU holemenu, HWND hwndActiveObject);
-	HRESULT STDMETHODCALLTYPE RemoveMenus(HMENU hmenuShared);
-	HRESULT STDMETHODCALLTYPE SetStatusText(LPCOLESTR pszStatusText);
-	HRESULT STDMETHODCALLTYPE EnableModeless(BOOL fEnable);
-	HRESULT STDMETHODCALLTYPE TranslateAccelerator(LPMSG lpmsg, WORD wID);
+	virtual HRESULT STDMETHODCALLTYPE InsertMenus(HMENU hmenuShared,
+		LPOLEMENUGROUPWIDTHS lpMenuWidths);
+	virtual HRESULT STDMETHODCALLTYPE SetMenu(HMENU hmenuShared,
+		HOLEMENU holemenu, HWND hwndActiveObject);
+	virtual HRESULT STDMETHODCALLTYPE RemoveMenus(HMENU hmenuShared);
+	virtual HRESULT STDMETHODCALLTYPE SetStatusText(LPCOLESTR pszStatusText);
+	virtual HRESULT STDMETHODCALLTYPE EnableModeless(BOOL fEnable);
+	virtual HRESULT STDMETHODCALLTYPE TranslateAccelerator(LPMSG lpmsg,
+		WORD wID);
 };
 
 #endif

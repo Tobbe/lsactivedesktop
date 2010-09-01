@@ -27,15 +27,15 @@ typedef std::basic_string<TCHAR> tstring;
 // This notification is sent via WM_COMMAND when you have called WebformGo(hWebF, url).
 // It indicates that the page has finished loading.
 
-class TWebf/* : public IUnknown */{
+class TWebf : public IUnknown, TOleClientSite, TDispatch, TDocHostShowUI, TDocHostUIHandler, TOleInPlaceSite, TOleInPlaceFrame {
 public:
 	long ref;
-	TOleClientSite clientsite;
-	TOleInPlaceSite site;
-	TOleInPlaceFrame frame;
-	TDocHostUIHandler uihandler;
-	TDocHostShowUI showui;
-	TDispatch dispatch;
+	//TOleClientSite clientsite;
+	//TOleInPlaceSite site;
+	//TOleInPlaceFrame frame;
+	//TDocHostUIHandler uihandler;
+	//TDocHostShowUI showui;
+	//TDispatch dispatch;
 	unsigned int isnaving;    // bitmask: 4=haven't yet finished Navigate call, 2=haven't yet received DocumentComplete, 1=haven't yet received BeforeNavigate
 
 	HWND hWnd;
@@ -62,6 +62,24 @@ public:
 	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppv);
 	ULONG STDMETHODCALLTYPE AddRef();
 	ULONG STDMETHODCALLTYPE Release();
+
+	// IDispatch
+	HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid,
+		LCID lcid, WORD wFlags, DISPPARAMS *Params, VARIANT *pVarResult,
+		EXCEPINFO *pExcepInfo, UINT *puArgErr);
+
+	// IDocHostUIHandler
+	HRESULT STDMETHODCALLTYPE GetHostInfo(DOCHOSTUIINFO *pInfo);
+	HRESULT STDMETHODCALLTYPE GetExternal(IDispatch **ppDispatch);
+
+	// IOleWindow (TOleInPlaceSite)
+	HRESULT STDMETHODCALLTYPE GetWindow(HWND *phwnd);
+
+	//IOleInPlaceSite
+	HRESULT STDMETHODCALLTYPE GetWindowContext(IOleInPlaceFrame **ppFrame,
+		IOleInPlaceUIWindow **ppDoc, LPRECT lprcPosRect, LPRECT lprcClipRect,
+		LPOLEINPLACEFRAMEINFO info);
+	HRESULT STDMETHODCALLTYPE OnPosRectChange(LPCRECT lprcPosRect);
 
 	void BeforeNavigate2(const wchar_t *url, short *cancel);
 	void DocumentComplete(const wchar_t *url); 

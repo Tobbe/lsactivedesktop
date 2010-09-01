@@ -3,30 +3,23 @@
 
 #include <windows.h>
 #include <mshtmhst.h>
-#include <mshtmdid.h>
-#include <exdispid.h>
-#include <tchar.h>
-#include <list>
-#include <string>
-
-class TWebf;
 
 class TOleClientSite : public IOleClientSite {
 public:
-	TWebf *webf;
-
 	// IUnknown
-	HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid, void **ppv);
-	ULONG STDMETHODCALLTYPE AddRef();
-	ULONG STDMETHODCALLTYPE Release();
+	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid,
+		void **ppv) = 0;
+	virtual ULONG STDMETHODCALLTYPE AddRef() = 0;
+	virtual ULONG STDMETHODCALLTYPE Release() = 0;
 
 	// IOleClientSite
-	HRESULT STDMETHODCALLTYPE SaveObject();
-	HRESULT STDMETHODCALLTYPE GetMoniker(DWORD dwAssign, DWORD dwWhichMoniker, IMoniker **ppmk);
-	HRESULT STDMETHODCALLTYPE GetContainer(IOleContainer **ppContainer);
-	HRESULT STDMETHODCALLTYPE ShowObject();
-	HRESULT STDMETHODCALLTYPE OnShowWindow(BOOL fShow);
-	HRESULT STDMETHODCALLTYPE RequestNewObjectLayout();
+	virtual HRESULT STDMETHODCALLTYPE SaveObject();
+	virtual HRESULT STDMETHODCALLTYPE GetMoniker(DWORD dwAssign,
+		DWORD dwWhichMoniker, IMoniker **ppmk);
+	virtual HRESULT STDMETHODCALLTYPE GetContainer(IOleContainer **ppContainer);
+	virtual HRESULT STDMETHODCALLTYPE ShowObject();
+	virtual HRESULT STDMETHODCALLTYPE OnShowWindow(BOOL fShow);
+	virtual HRESULT STDMETHODCALLTYPE RequestNewObjectLayout();
 };
 
 #endif
