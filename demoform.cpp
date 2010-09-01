@@ -9,7 +9,6 @@
 
 HINSTANCE hInstance;
 HWND hMain;         // Our main window
-HWND hwebf;         // We declare this handle globally, just for convenience
 
 const TCHAR* className = _T("classLSActiveDesktop");
 LPCSTR revID = "LSActiveDesktop 0.1 by Tobbe";
@@ -17,7 +16,6 @@ LPCSTR revID = "LSActiveDesktop 0.1 by Tobbe";
 bool loaded;
 LSADSettings settings;
 TWebf *webForm;
-TWebf *webForm2;
 
 void __cdecl bangNavigate(HWND caller, const char* args);
 void reportError(LPCSTR msg);
@@ -41,14 +39,13 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			return 0;
 		case WM_CREATE:
-			webForm->create(hwnd, hInstance, 103, 0, 0, settings.showScrollbars);
-			hwebf = webForm->hWnd;
-
-			webForm2->create(hwnd, hInstance, 104, 0, 300, settings.showScrollbars);
+			webForm->create(hwnd, hInstance, 103, settings.showScrollbars);
 
 			break;
 		case WM_SIZE:
-			//MoveWindow(hwebf, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
+			if (webForm->hWnd) {
+				MoveWindow(webForm->hWnd, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
+			}
 
 			break;
 		case WM_PAINT: {
@@ -101,16 +98,10 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 	readSettings();
 
-	HWND parent = NULL;
 	webForm = new TWebf();
-	webForm2 = new TWebf();
-
-	if (parentWnd != NULL && parentWnd != GetLitestepWnd()) {
-		parent = parentWnd;
-	}
 
 	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), WS_POPUP | WS_CLIPCHILDREN,
-		200, 300, 1300, 600, GetLitestepWnd(), NULL, hInstance, NULL);
+		200, 300, 1300, 600, NULL, NULL, hInstance, NULL);
 
 	if (hMain == NULL) {
 		reportError("Error creating LSActiveDesktop window");
@@ -137,7 +128,7 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 void __cdecl bangNavigate(HWND caller, const char* args)
 {
 	if (args && args[0] != '\0') {
-		SetWindowText(hwebf, args);
+		SetWindowText(webForm->hWnd, args);
 	}
 }
 

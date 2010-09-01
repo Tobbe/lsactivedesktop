@@ -10,7 +10,7 @@
 
 TWebf::TWebf() :
 	ref(1), ibrowser(NULL), cookie(0), isnaving(0), url(NULL), kurl(NULL),
-	hasScrollbars(false), hhost(NULL)
+	hasScrollbars(false), hhost(NULL), hWnd(NULL)
 {
 }
 
@@ -272,9 +272,10 @@ LRESULT TWebf::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-void TWebf::create(HWND hWndParent, HINSTANCE hInstance, LONG_PTR id, UINT x, UINT y, bool showScrollbars)
+void TWebf::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars)
 {
 	hasScrollbars = showScrollbars;
+	this->id = id;
 
 	WNDCLASSEX wcex = {0};
 	if (!GetClassInfoEx(hInstance, WEBFORM_CLASS, &wcex)) {
@@ -296,7 +297,7 @@ void TWebf::create(HWND hWndParent, HINSTANCE hInstance, LONG_PTR id, UINT x, UI
 		WEBFORM_CLASS,
 		_T("http://tlundberg.com"),
 		WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
-		x, y, 1300, 300, hWndParent, (HMENU)id, hInstance, (LPVOID)this);
+		0, 0, 100, 100, hWndParent, (HMENU)(LONG_PTR)id, hInstance, (LPVOID)this);
 
 	hhost = hWnd;
 

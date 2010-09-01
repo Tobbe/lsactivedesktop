@@ -29,6 +29,7 @@ public:
 	unsigned int isnaving;    // bitmask: 4=haven't yet finished Navigate call, 2=haven't yet received DocumentComplete, 1=haven't yet received BeforeNavigate
 
 	HWND hWnd;
+	UINT id;
 	HWND hhost;               // This is the window that hosts us
 	IWebBrowser2 *ibrowser;   // Our pointer to the browser itself. Released in Close().
 	DWORD cookie;             // By this cookie shall the watcher be known
@@ -39,7 +40,7 @@ public:
 
 	TWebf();
 	~TWebf();
-	void create(HWND hWndParent, HINSTANCE hInstance, LONG_PTR id, UINT x, UINT y, bool showScrollbars);
+	void create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars);
 	void CloseThread();
 	void Close();
 	void Go(const TCHAR *fn);
