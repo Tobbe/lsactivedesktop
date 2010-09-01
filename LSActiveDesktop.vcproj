@@ -227,6 +227,10 @@
 				RelativePath=".\webform.cpp"
 				>
 			</File>
+			<File
+				RelativePath=".\webwindow.cpp"
+				>
+			</File>
 		</Filter>
 		<Filter
 			Name="Header Files"
@@ -267,6 +271,10 @@
 			</File>
 			<File
 				RelativePath=".\webform.h"
+				>
+			</File>
+			<File
+				RelativePath=".\webwindow.h"
 				>
 			</File>
 		</Filter>

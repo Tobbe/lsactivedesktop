@@ -6,6 +6,8 @@
 #include "webform.h"
 #include "demoform.h"
 #include <tchar.h>
+#include <list>
+#include "webwindow.h"
 
 HINSTANCE hInstance;
 HWND hMain;         // Our main window
@@ -15,7 +17,7 @@ LPCSTR revID = "LSActiveDesktop 0.1 by Tobbe";
 
 bool loaded;
 LSADSettings settings;
-TWebf *webForm;
+std::list<WebWindow*> webWindows;
 
 void __cdecl bangNavigate(HWND caller, const char* args);
 void reportError(LPCSTR msg);
@@ -39,33 +41,13 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			return 0;
 		case WM_CREATE:
-			webForm->create(hwnd, hInstance, 103, settings.showScrollbars);
-
-			break;
-		case WM_SIZE:
-			if (webForm->hWnd) {
-				MoveWindow(webForm->hWnd, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
+			int x = 100;
+			int y = 100;
+			for (std::list<WebWindow*>::iterator it = webWindows.begin(); it != webWindows.end(); it++) {
+				(*it)->Create(hInstance, x, y, 1300, 300);
+				y += 400;
 			}
-
 			break;
-		case WM_PAINT: {
-			PAINTSTRUCT ps;
-			BeginPaint(hwnd, &ps);
-			FillRect(ps.hdc, &ps.rcPaint, (HBRUSH)GetStockObject(WHITE_BRUSH));
-			EndPaint(hwnd,&ps);
-
-			return 0;
-		}
-		case WM_COMMAND: {
-			int id = LOWORD(wParam);
-			int code = HIWORD(wParam);
-
-			if (id == 103 && code == WEBFN_LOADED) {
-				loaded = true;
-			}
-
-			break;
-		}
 	}
 
 	return DefWindowProc(hwnd, msg, wParam, lParam);
@@ -98,10 +80,11 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 	readSettings();
 
-	webForm = new TWebf();
+	webWindows.push_back(new WebWindow());
+	webWindows.push_back(new WebWindow());
 
-	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), WS_POPUP | WS_CLIPCHILDREN,
-		200, 300, 1300, 600, NULL, NULL, hInstance, NULL);
+	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+		1000, 700, 200, 200, NULL, NULL, hInstance, NULL);
 
 	if (hMain == NULL) {
 		reportError("Error creating LSActiveDesktop window");
@@ -128,7 +111,7 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 void __cdecl bangNavigate(HWND caller, const char* args)
 {
 	if (args && args[0] != '\0') {
-		SetWindowText(webForm->hWnd, args);
+		SetWindowText(webWindows.front()->webForm->hWnd, args);
 	}
 }
 
@@ -163,6 +146,10 @@ extern "C" void __cdecl quitModule(HINSTANCE dllInst)
 
 	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
 	SendMessage(GetLitestepWnd(), LM_UNREGISTERMESSAGE, (WPARAM)hMain, (LPARAM)msgs);
+
+	for (std::list<WebWindow*>::iterator it = webWindows.begin(); it != webWindows.end(); it++) {
+		delete *it;
+	}
 
 	if (hMain != NULL)
 	{
