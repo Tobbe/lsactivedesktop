@@ -6,7 +6,9 @@
 #include "webform.h"
 #include "demoform.h"
 #include <tchar.h>
-#include <list>
+#include <map>
+#include <string>
+#include <sstream>
 #include "webwindow.h"
 
 HINSTANCE hInstance;
@@ -17,9 +19,9 @@ LPCSTR revID = "LSActiveDesktop 0.1 by Tobbe";
 
 bool loaded;
 LSADSettings settings;
-std::list<WebWindow*> webWindows;
+std::map<std::string, WebWindow*> webWindows;
 
-void __cdecl bangNavigate(HWND caller, const char* args);
+void __cdecl bangNavigate(HWND caller, const char* bangCommandName, const char* args);
 void reportError(LPCSTR msg);
 void readSettings();
 LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -41,10 +43,12 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 
 			return 0;
 		case WM_CREATE:
-			int x = 100;
-			int y = 100;
-			for (std::list<WebWindow*>::iterator it = webWindows.begin(); it != webWindows.end(); it++) {
-				(*it)->Create(hInstance, x, y, 1300, 300);
+			for (std::map<std::string, WebWindow*>::iterator it = webWindows.begin(); it != webWindows.end(); it++) {
+				int x = settings.windowProperties[it->first].x;
+				int y = settings.windowProperties[it->first].y;
+				int width = settings.windowProperties[it->first].width;
+				int height = settings.windowProperties[it->first].height;
+				it->second->Create(hInstance, x, y, width, height);
 				y += 400;
 			}
 			break;
@@ -80,8 +84,9 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 	readSettings();
 
-	webWindows.push_back(new WebWindow());
-	webWindows.push_back(new WebWindow());
+	for (std::map<std::string, LSADWebWndProp>::iterator it = settings.windowProperties.begin(); it != settings.windowProperties.end(); it++) {
+		webWindows.insert(make_pair(it->first, new WebWindow()));
+	}
 
 	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
 		1000, 700, 200, 200, NULL, NULL, hInstance, NULL);
@@ -94,12 +99,21 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 	ShowWindow(hMain, SW_SHOW);
 
-	// Register our bangs with LiteStep
-	AddBangCommand("!LSActiveDesktopNavigate", bangNavigate);
-	/*AddBangCommand("!LSActiveDesktopBack", bangBack);
-	AddBangCommand("!LSActiveDesktopForward", bangForward);
-	AddBangCommand("!LSActiveDesktopRefresh", bangRefresh);
-	AddBangCommand("!LSActiveDesktopRefreshCache", bangRefreshCache);*/
+	for (std::map<std::string, LSADWebWndProp>::iterator it = settings.windowProperties.begin(); it != settings.windowProperties.end(); it++) {
+		std::ostringstream bangName;
+		bangName << "!" << it->first << "Navigate";
+		AddBangCommandEx(bangName.str().c_str(), bangNavigate);
+		bangName.str("");
+		/*bangName << "!" << it->first << "Forward";
+		AddBangCommandEx(bangName.str().c_str(), bangForward);
+		bangName.str("");
+		bangName << "!" << it->first << "Refresh";
+		AddBangCommandEx(bangName.str().c_str(), bangRefresh);
+		bangName.str("");
+		bangName << "!" << it->first << "RefreshCache";
+		AddBangCommandEx(bangName.str().c_str(), bangRefreshCache);
+		bangName.str("");*/
+	}
 
 	// Register message for version info
 	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
@@ -108,10 +122,14 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 	return 0;
 }
 
-void __cdecl bangNavigate(HWND caller, const char* args)
+void __cdecl bangNavigate(HWND caller, const char* bangCommandName, const char* args)
 {
+	std::string bangName(bangCommandName);
+	size_t nameLength = bangName.length() - strlen("Navigate");
+	std::string webWindowName = bangName.substr(1, nameLength - 1);
+
 	if (args && args[0] != '\0') {
-		SetWindowText(webWindows.front()->webForm->hWnd, args);
+		SetWindowText(webWindows[webWindowName]->webForm->hWnd, args);
 	}
 }
 
@@ -119,6 +137,22 @@ void readSettings()
 {
 	settings.showErrors = GetRCBoolDef("LSActiveDesktopShowErrors", TRUE) != FALSE;
 	settings.showScrollbars = GetRCBoolDef("LSActiveDesktopShowScrollBars", TRUE) != FALSE;
+
+	char line[MAX_LINE_LENGTH + 1];
+	const char *tokenStart = line;
+	char token[MAX_LINE_LENGTH + 1];
+	GetRCLine("LSActiveDesktopWebWindows", line, MAX_LINE_LENGTH + 1, NULL);
+	while (GetToken(tokenStart, token, &tokenStart, false)) {
+		std::string name(token);
+
+		LSADWebWndProp props;
+		props.x = GetRCInt((name + "X").c_str(), 0);
+		props.y = GetRCInt((name + "Y").c_str(), 0);
+		props.width = GetRCInt((name + "Width").c_str(), 100);
+		props.height = GetRCInt((name + "Height").c_str(), 100);
+
+		settings.windowProperties.insert(make_pair(name, props));
+	}
 	/*settings.unmuteOnVolUp = GetRCBoolDef("tVolEzyUnmuteOnVolUp", TRUE) != FALSE;
 	settings.unmuteOnVolDown = GetRCBoolDef("tVolEzyUnmuteOnVolDown", FALSE) != FALSE;
 	char buffer[1024];
@@ -147,8 +181,8 @@ extern "C" void __cdecl quitModule(HINSTANCE dllInst)
 	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
 	SendMessage(GetLitestepWnd(), LM_UNREGISTERMESSAGE, (WPARAM)hMain, (LPARAM)msgs);
 
-	for (std::list<WebWindow*>::iterator it = webWindows.begin(); it != webWindows.end(); it++) {
-		delete *it;
+	for (std::map<std::string, WebWindow*>::iterator it = webWindows.begin(); it != webWindows.end(); it++) {
+		delete it->second;
 	}
 
 	if (hMain != NULL)
