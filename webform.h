@@ -5,19 +5,12 @@
 #include <exdisp.h>
 #include <windows.h>
 #include <mshtmhst.h>
-#include <mshtmdid.h>
-#include <exdispid.h>
-#include <tchar.h>
-#include <list>
 #include "toleclientsite.h"
 #include "toleinplacesite.h"
 #include "toleinplaceframe.h"
 #include "tdochostuihandler.h"
 #include "tdochostshowui.h"
 #include "tdispatch.h"
-
-typedef std::basic_string<TCHAR> tstring;
-
 
 #define WEBFORM_CLASS (_T("WebformClass"))
 // Create a Webfrom control with CreateWindow(WEBFORM_CLASS,_T("initial-url"),...)
@@ -27,15 +20,12 @@ typedef std::basic_string<TCHAR> tstring;
 // This notification is sent via WM_COMMAND when you have called WebformGo(hWebF, url).
 // It indicates that the page has finished loading.
 
+#pragma warning(push)
+#pragma warning(disable:4584)
 class TWebf : public IUnknown, TOleClientSite, TDispatch, TDocHostShowUI, TDocHostUIHandler, TOleInPlaceSite, TOleInPlaceFrame {
+#pragma warning(pop)
 public:
 	long ref;
-	//TOleClientSite clientsite;
-	//TOleInPlaceSite site;
-	//TOleInPlaceFrame frame;
-	//TDocHostUIHandler uihandler;
-	//TDocHostShowUI showui;
-	//TDispatch dispatch;
 	unsigned int isnaving;    // bitmask: 4=haven't yet finished Navigate call, 2=haven't yet received DocumentComplete, 1=haven't yet received BeforeNavigate
 
 	HWND hWnd;
@@ -46,7 +36,6 @@ public:
 	bool hasScrollbars;       // This is read from WS_VSCROLL|WS_HSCROLL at WM_CREATE
 	TCHAR *url;               // This was the url that the user just clicked on
 	TCHAR *kurl;              // Key\0Value\0Key2\0Value2\0\0 arguments for the url just clicked on
-	HANDLE hf;
 
 	TWebf();
 	~TWebf();

@@ -10,7 +10,7 @@
 
 TWebf::TWebf() :
 	ref(1), ibrowser(NULL), cookie(0), isnaving(0), url(NULL), kurl(NULL),
-	hasScrollbars(false), hhost(NULL), hf(INVALID_HANDLE_VALUE)
+	hasScrollbars(false), hhost(NULL)
 {
 }
 
@@ -107,12 +107,6 @@ void TWebf::Close()
 
 TWebf::~TWebf()
 {
-	if (hf != INVALID_HANDLE_VALUE) {
-		CloseHandle(hf);
-	}
-	
-	hf = INVALID_HANDLE_VALUE;
-
 	if (url != 0) {
 		delete[] url;
 	}
@@ -173,20 +167,18 @@ HRESULT STDMETHODCALLTYPE TWebf::QueryInterface(REFIID riid, void **ppv)
 {
 	*ppv = NULL;
 
-	/*if (riid == IID_IUnknown) {
-		*ppv = static_cast<IUnknown*>(this);
-	} else */if (riid == IID_IUnknown || riid == IID_IOleClientSite) {
-		*ppv = static_cast<IOleClientSite*>(this); //&clientsite;
+	if (riid == IID_IUnknown || riid == IID_IOleClientSite) {
+		*ppv = static_cast<IOleClientSite*>(this);
 	} else if (riid == IID_IOleWindow || riid == IID_IOleInPlaceSite) {
-		*ppv = static_cast<IOleInPlaceSite*>(this);//&site;
+		*ppv = static_cast<IOleInPlaceSite*>(this);
 	} else if (riid == IID_IOleInPlaceUIWindow) {
-		*ppv = static_cast<IOleInPlaceUIWindow*>(this);//&frame;
+		*ppv = static_cast<IOleInPlaceUIWindow*>(this);
 	} else if (riid == IID_IOleInPlaceFrame) {
-		*ppv = static_cast<IOleInPlaceFrame*>(this);//&frame;
+		*ppv = static_cast<IOleInPlaceFrame*>(this);
 	} else if (riid == IID_IDispatch) {
-		*ppv = static_cast<IDispatch*>(this); //&dispatch;
+		*ppv = static_cast<IDispatch*>(this);
 	} else if (riid == IID_IDocHostUIHandler) {
-		*ppv = static_cast<IDocHostUIHandler*>(this); //&uihandler;
+		*ppv = static_cast<IDocHostUIHandler*>(this);
 	} else if (riid == IID_IDocHostShowUI) {
 		*ppv = static_cast<IDocHostShowUI*>(this);
 	}
@@ -217,28 +209,12 @@ ULONG STDMETHODCALLTYPE TWebf::Release()
 
 LRESULT CALLBACK TWebf::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
-	/*if (msg == WM_NCCREATE) {
-		TWebf *webf = (TWebf*)((LPCREATESTRUCT(lParam))->lpCreateParams);
-		webf->Close();
-		webf->Release();
-
-		//#pragma warning(suppress:4244)
-		//SetWindowLongPtr(hwnd, 0, (LONG_PTR)webf);
-
-		return DefWindowProc(hwnd, msg, wParam, lParam);
-	}*/
-
-	if (msg == WM_CREATE) {
+	if (msg == WM_NCCREATE) {
 		TWebf *webf = (TWebf*)((LPCREATESTRUCT(lParam))->lpCreateParams);
 		webf->hWnd = hwnd;
 
 		#pragma warning(suppress:4244)
 		SetWindowLongPtr(hwnd, 0, (LONG_PTR)webf);
-		CREATESTRUCT *cs = (CREATESTRUCT*)lParam;
-
-		if (cs->style & (WS_HSCROLL | WS_VSCROLL)) {
-			SetWindowLongPtr(hwnd, GWL_STYLE, cs->style & ~(WS_HSCROLL | WS_VSCROLL));
-		}
 
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
@@ -256,6 +232,15 @@ LRESULT CALLBACK TWebf::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 LRESULT TWebf::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
+		case WM_CREATE: {
+			CREATESTRUCT *cs = (CREATESTRUCT*)lParam;
+
+			if (cs->style & (WS_HSCROLL | WS_VSCROLL)) {
+				SetWindowLongPtr(hWnd, GWL_STYLE, cs->style & ~(WS_HSCROLL | WS_VSCROLL));
+			}
+
+			break;
+		}
 		case WM_DESTROY:
 			Close();
 			Release();

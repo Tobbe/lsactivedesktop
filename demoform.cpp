@@ -5,6 +5,7 @@
 #include "lsadsettings.h"
 #include "webform.h"
 #include "demoform.h"
+#include <tchar.h>
 
 HINSTANCE hInstance;
 HWND hMain;         // Our main window
