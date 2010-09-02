@@ -49,9 +49,9 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				int width = settings.windowProperties[it->first].width;
 				int height = settings.windowProperties[it->first].height;
 				std::string url = settings.windowProperties[it->first].url;
-				it->second->Create(hInstance, x, y, width, height);
+				bool showScrollbars = settings.windowProperties[it->first].showScrollbars;
+				it->second->Create(hInstance, x, y, width, height, showScrollbars);
 				it->second->webForm->Go(url.c_str());
-		//SetWindowText(webWindows[webWindowName]->webForm->hWnd, args);
 				y += 400;
 			}
 			break;
@@ -153,7 +153,7 @@ void __cdecl bangNavigate(HWND caller, const char* bangCommandName, const char* 
 void readSettings()
 {
 	settings.showErrors = GetRCBoolDef("LSActiveDesktopShowErrors", TRUE) != FALSE;
-	settings.showScrollbars = GetRCBoolDef("LSActiveDesktopShowScrollBars", TRUE) != FALSE;
+	settings.showScrollbars = !(GetRCBool("LSActiveDesktopHideScrollbars", TRUE) != FALSE);
 
 	char line[MAX_LINE_LENGTH + 1];
 	const char *tokenStart = line;
@@ -167,6 +167,7 @@ void readSettings()
 		props.y = GetRCCoordinate((name + "Y").c_str(), 0, GetSystemMetrics(SM_CYVIRTUALSCREEN));
 		props.width = GetRCInt((name + "Width").c_str(), 100);
 		props.height = GetRCInt((name + "Height").c_str(), 100);
+		props.showScrollbars = !(GetRCBool((name + "HideScrollbars").c_str(), TRUE) != FALSE);
 
 		char url[MAX_LINE_LENGTH + 1];
 		GetRCString((name + "URL").c_str(), url, "http://tlundberg.com", MAX_LINE_LENGTH + 1);

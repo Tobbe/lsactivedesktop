@@ -1,11 +1,12 @@
 #include "webwindow.h"
 
-void WebWindow::Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT height)
+void WebWindow::Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT height, bool showScrollbars)
 {
 	WNDCLASSEX wcex;
 	static const char *className = "WebWindowClass";
 
 	this->hInstWebWindow = hInstance;
+	this->showScrollbars = showScrollbars;
 
 	if (!GetClassInfoEx(hInstance, className, &wcex)) {
 		ZeroMemory(&wcex, sizeof(wcex));
@@ -76,7 +77,7 @@ LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
 		case WM_CREATE: {
-			webForm->create(hWndWebWindow, hInstWebWindow, 103, true);
+			webForm->create(hWndWebWindow, hInstWebWindow, 103, showScrollbars);
 
 			break;
 		}

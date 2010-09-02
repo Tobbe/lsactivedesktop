@@ -9,6 +9,7 @@ struct LSADWebWndProp {
 	UINT y;
 	UINT width;
 	UINT height;
+	bool showScrollbars;
 	std::string url;
 };
 
