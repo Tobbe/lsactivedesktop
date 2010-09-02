@@ -302,8 +302,6 @@ void TWebf::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrol
 	hhost = hWnd;
 
 	setupOle();
-
-	Go("http://tlundberg.com");
 }
 
 HRESULT STDMETHODCALLTYPE TWebf::Invoke(DISPID dispIdMember, REFIID riid,

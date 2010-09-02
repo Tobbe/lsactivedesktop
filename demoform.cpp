@@ -48,7 +48,10 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 				int y = settings.windowProperties[it->first].y;
 				int width = settings.windowProperties[it->first].width;
 				int height = settings.windowProperties[it->first].height;
+				std::string url = settings.windowProperties[it->first].url;
 				it->second->Create(hInstance, x, y, width, height);
+				it->second->webForm->Go(url.c_str());
+		//SetWindowText(webWindows[webWindowName]->webForm->hWnd, args);
 				y += 400;
 			}
 			break;
@@ -89,7 +92,7 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 	}
 
 	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-		1000, 700, 200, 200, NULL, NULL, hInstance, NULL);
+		1000, 700, 200, 200, HWND_MESSAGE, NULL, hInstance, NULL);
 
 	if (hMain == NULL) {
 		reportError("Error creating LSActiveDesktop window");
@@ -99,11 +102,11 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 	ShowWindow(hMain, SW_SHOW);
 
-	for (std::map<std::string, LSADWebWndProp>::iterator it = settings.windowProperties.begin(); it != settings.windowProperties.end(); it++) {
+	/*for (std::map<std::string, LSADWebWndProp>::iterator it = settings.windowProperties.begin(); it != settings.windowProperties.end(); it++) {
 		std::ostringstream bangName;
 		bangName << "!" << it->first << "Navigate";
 		AddBangCommandEx(bangName.str().c_str(), bangNavigate);
-		bangName.str("");
+		bangName.str("");*/
 		/*bangName << "!" << it->first << "Forward";
 		AddBangCommandEx(bangName.str().c_str(), bangForward);
 		bangName.str("");
@@ -113,7 +116,8 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 		bangName << "!" << it->first << "RefreshCache";
 		AddBangCommandEx(bangName.str().c_str(), bangRefreshCache);
 		bangName.str("");*/
-	}
+	//}
+	AddBangCommandEx("!LSActiveDesktopNavigate", bangNavigate);
 
 	// Register message for version info
 	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
@@ -124,13 +128,26 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 void __cdecl bangNavigate(HWND caller, const char* bangCommandName, const char* args)
 {
-	std::string bangName(bangCommandName);
+	/*std::string bangName(bangCommandName);
 	size_t nameLength = bangName.length() - strlen("Navigate");
 	std::string webWindowName = bangName.substr(1, nameLength - 1);
 
 	if (args && args[0] != '\0') {
 		SetWindowText(webWindows[webWindowName]->webForm->hWnd, args);
+	}*/
+
+	const char *tokenStart = args;
+	char token[MAX_LINE_LENGTH + 1];
+	if (!GetToken(tokenStart, token, &tokenStart, false)) {
+		reportError("Wrong bang command syntax");
 	}
+	std::string name(token);
+	if (!GetToken(tokenStart, token, &tokenStart, false)) {
+		reportError("Wrong bang command syntax");
+	}
+	std::string url(token);
+
+	webWindows[name]->webForm->Go(url.c_str());
 }
 
 void readSettings()
@@ -146,10 +163,14 @@ void readSettings()
 		std::string name(token);
 
 		LSADWebWndProp props;
-		props.x = GetRCInt((name + "X").c_str(), 0);
-		props.y = GetRCInt((name + "Y").c_str(), 0);
+		props.x = GetRCCoordinate((name + "X").c_str(), 0, GetSystemMetrics(SM_CXVIRTUALSCREEN));
+		props.y = GetRCCoordinate((name + "Y").c_str(), 0, GetSystemMetrics(SM_CYVIRTUALSCREEN));
 		props.width = GetRCInt((name + "Width").c_str(), 100);
 		props.height = GetRCInt((name + "Height").c_str(), 100);
+
+		char url[MAX_LINE_LENGTH + 1];
+		GetRCString((name + "URL").c_str(), url, "http://tlundberg.com", MAX_LINE_LENGTH + 1);
+		props.url = url;
 
 		settings.windowProperties.insert(make_pair(name, props));
 	}

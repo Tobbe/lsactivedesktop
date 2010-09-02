@@ -9,6 +9,7 @@ struct LSADWebWndProp {
 	UINT y;
 	UINT width;
 	UINT height;
+	std::string url;
 };
 
 struct LSADSettings {

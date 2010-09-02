@@ -31,8 +31,14 @@ void WebWindow::Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT hei
 
 	webForm = new TWebf();
 
-	hWndWebWindow = CreateWindowEx(0, className, "WebWindowWindow", WS_POPUP | WS_CLIPCHILDREN,
-		x, y, width, height, NULL, NULL, hInstance, (LPVOID)this);
+	HWND hWndDesktop = FindWindow("DesktopBackgroundClass", 0);
+
+	if (hWndDesktop == NULL) {
+		hWndDesktop = GetDesktopWindow();
+	}
+
+	hWndWebWindow = CreateWindowEx(0, className, "WebWindowWindow", WS_CHILD/*WS_POPUP | WS_CLIPCHILDREN*/,
+		x, y, width, height, hWndDesktop, NULL, hInstance, (LPVOID)this);
 
 	if (hWndWebWindow == NULL) {
 		//reportError("Error creating LSActiveDesktop window");
