@@ -77,6 +77,11 @@ public:
 		LPOLEINPLACEFRAMEINFO info);
 	HRESULT STDMETHODCALLTYPE OnPosRectChange(LPCRECT lprcPosRect);
 
+	//IDocHostShowUI
+	HRESULT STDMETHODCALLTYPE ShowMessage(HWND hwnd, LPOLESTR lpstrText,
+		LPOLESTR lpstrCaption, DWORD dwType, LPOLESTR lpstrHelpFile,
+		DWORD dwHelpContext, LRESULT *plResult);
+
 	void BeforeNavigate2(const wchar_t *url, short *cancel);
 	void DocumentComplete(const wchar_t *url); 
 };

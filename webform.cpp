@@ -447,3 +447,10 @@ HRESULT STDMETHODCALLTYPE WebForm::OnPosRectChange(LPCRECT lprcPosRect)
 
 	return S_OK;
 }
+
+HRESULT STDMETHODCALLTYPE WebForm::ShowMessage(HWND hwnd, LPOLESTR lpstrText,
+	LPOLESTR lpstrCaption, DWORD dwType, LPOLESTR lpstrHelpFile,
+	DWORD dwHelpContext, LRESULT *plResult)
+{
+	return S_FALSE;
+}
