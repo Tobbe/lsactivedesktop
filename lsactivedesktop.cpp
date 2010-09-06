@@ -4,7 +4,7 @@
 #include <windows.h>
 #include "lsadsettings.h"
 #include "webform.h"
-#include "demoform.h"
+#include "lsactivedesktop.h"
 #include <tchar.h>
 #include <map>
 #include <string>

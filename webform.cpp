@@ -8,13 +8,13 @@
 #include "TOleClientSite.h"
 #include "toleinplaceframe.h"
 
-TWebf::TWebf(WebformDispatchHandler *wdh) :
+WebForm::WebForm(WebformDispatchHandler *wdh) :
 	ref(1), ibrowser(NULL), cookie(0), isnaving(0), url(NULL), kurl(NULL),
 	hasScrollbars(false), hhost(NULL), hWnd(NULL), dispatchHandler(wdh)
 {
 }
 
-void TWebf::setupOle()
+void WebForm::setupOle()
 {
 	RECT rc;
 	GetClientRect(hhost, &rc);
@@ -75,7 +75,7 @@ void TWebf::setupOle()
 	iole->Release();
 }
 
-void TWebf::Close()
+void WebForm::Close()
 {
 	if (ibrowser != 0) {
 		IConnectionPointContainer *cpc = 0;
@@ -105,7 +105,7 @@ void TWebf::Close()
 	}
 }
 
-TWebf::~TWebf()
+WebForm::~WebForm()
 {
 	if (url != 0) {
 		delete[] url;
@@ -144,7 +144,7 @@ char *BSTRToLPSTR(BSTR bStr, LPSTR lpstr)
 	return lpstr;
 }
 
-void TWebf::Go(const TCHAR *url)
+void WebForm::Go(const TCHAR *url)
 {
 	if (url == NULL || ibrowser == NULL) {
 		return;
@@ -167,7 +167,7 @@ void TWebf::Go(const TCHAR *url)
 	isnaving &= ~4;
 }
 
-IHTMLDocument2 *TWebf::GetDoc()
+IHTMLDocument2 *WebForm::GetDoc()
 {
 	IDispatch *dispatch = 0;
 	ibrowser->get_Document(&dispatch);
@@ -183,7 +183,7 @@ IHTMLDocument2 *TWebf::GetDoc()
 	return doc;
 }
 
-void TWebf::RunJSFunction(std::string cmd)
+void WebForm::RunJSFunction(std::string cmd)
 {
 	IHTMLDocument2 *doc = GetDoc();
 	IHTMLWindow2 *win = NULL;
@@ -206,7 +206,7 @@ void TWebf::RunJSFunction(std::string cmd)
 	doc->Release();
 }
 
-void TWebf::DocumentComplete(const wchar_t *)
+void WebForm::DocumentComplete(const wchar_t *)
 {
 	isnaving &= ~2;
 
@@ -218,7 +218,7 @@ void TWebf::DocumentComplete(const wchar_t *)
 	PostMessage(GetParent(hhost), WM_COMMAND, w, (LPARAM)hhost);
 }
 
-HRESULT STDMETHODCALLTYPE TWebf::QueryInterface(REFIID riid, void **ppv)
+HRESULT STDMETHODCALLTYPE WebForm::QueryInterface(REFIID riid, void **ppv)
 {
 	*ppv = NULL;
 
@@ -246,12 +246,12 @@ HRESULT STDMETHODCALLTYPE TWebf::QueryInterface(REFIID riid, void **ppv)
 	return E_NOINTERFACE;
 }
 
-ULONG STDMETHODCALLTYPE TWebf::AddRef()
+ULONG STDMETHODCALLTYPE WebForm::AddRef()
 {
 	return InterlockedIncrement(&ref);
 }
 
-ULONG STDMETHODCALLTYPE TWebf::Release()
+ULONG STDMETHODCALLTYPE WebForm::Release()
 {
 	int tmp = InterlockedDecrement(&ref);
 	
@@ -262,10 +262,10 @@ ULONG STDMETHODCALLTYPE TWebf::Release()
 	return tmp;
 }
 
-LRESULT CALLBACK TWebf::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK WebForm::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_NCCREATE) {
-		TWebf *webf = (TWebf*)((LPCREATESTRUCT(lParam))->lpCreateParams);
+		WebForm *webf = (WebForm*)((LPCREATESTRUCT(lParam))->lpCreateParams);
 		webf->hWnd = hwnd;
 
 		#pragma warning(suppress:4244)
@@ -275,7 +275,7 @@ LRESULT CALLBACK TWebf::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 	}
 
 	#pragma warning(suppress:4312)
-	TWebf *webf = (TWebf*)GetWindowLongPtr(hwnd, 0);
+	WebForm *webf = (WebForm*)GetWindowLongPtr(hwnd, 0);
 
 	if (webf == NULL) {
 		return DefWindowProc(hwnd, msg, wParam, lParam);
@@ -284,7 +284,7 @@ LRESULT CALLBACK TWebf::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARA
 	return webf->InstanceWndProc(msg, wParam, lParam);
 }
 
-LRESULT TWebf::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
+LRESULT WebForm::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
 		case WM_CREATE: {
@@ -327,7 +327,7 @@ LRESULT TWebf::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 	return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-void TWebf::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars)
+void WebForm::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars)
 {
 	hasScrollbars = showScrollbars;
 	this->id = id;
@@ -336,13 +336,13 @@ void TWebf::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrol
 	if (!GetClassInfoEx(hInstance, WEBFORM_CLASS, &wcex)) {
 		wcex.cbSize = sizeof(WNDCLASSEX);
 		wcex.style = CS_HREDRAW | CS_VREDRAW;
-		wcex.lpfnWndProc = (WNDPROC)TWebf::WebformWndProc;
+		wcex.lpfnWndProc = (WNDPROC)WebForm::WebformWndProc;
 		wcex.hInstance = hInstance;
 		wcex.lpszClassName = WEBFORM_CLASS;
-		wcex.cbWndExtra = sizeof(TWebf*);
+		wcex.cbWndExtra = sizeof(WebForm*);
 
 		if(!RegisterClassEx(&wcex)) {
-			MessageBox(NULL, "Could not auto register the webform", "TWebf::create", MB_OK);
+			MessageBox(NULL, "Could not auto register the webform", "WebForm::create", MB_OK);
 
 			return;
 		}
@@ -359,7 +359,7 @@ void TWebf::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrol
 	setupOle();
 }
 
-HRESULT STDMETHODCALLTYPE TWebf::Invoke(DISPID dispIdMember, REFIID riid,
+HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 	LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult,
 	EXCEPINFO *pExcepInfo, UINT *puArgErr)
 {
@@ -397,28 +397,28 @@ HRESULT STDMETHODCALLTYPE TWebf::Invoke(DISPID dispIdMember, REFIID riid,
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TWebf::GetHostInfo(DOCHOSTUIINFO *pInfo)
+HRESULT STDMETHODCALLTYPE WebForm::GetHostInfo(DOCHOSTUIINFO *pInfo)
 {
 	pInfo->dwFlags = (hasScrollbars ? 0 : DOCHOSTUIFLAG_SCROLL_NO) | DOCHOSTUIFLAG_NO3DOUTERBORDER;
 	
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TWebf::GetExternal(IDispatch **ppDispatch)
+HRESULT STDMETHODCALLTYPE WebForm::GetExternal(IDispatch **ppDispatch)
 {
 	*ppDispatch = static_cast<IDispatch*>(this);
 
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TWebf::GetWindow(HWND *phwnd)
+HRESULT STDMETHODCALLTYPE WebForm::GetWindow(HWND *phwnd)
 {
 	*phwnd = hhost;
 
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TWebf::GetWindowContext(IOleInPlaceFrame **ppFrame,
+HRESULT STDMETHODCALLTYPE WebForm::GetWindowContext(IOleInPlaceFrame **ppFrame,
 	IOleInPlaceUIWindow **ppDoc, LPRECT lprcPosRect, LPRECT lprcClipRect,
 	LPOLEINPLACEFRAMEINFO info)
 {
@@ -435,7 +435,7 @@ HRESULT STDMETHODCALLTYPE TWebf::GetWindowContext(IOleInPlaceFrame **ppFrame,
 	return S_OK;
 }
 
-HRESULT STDMETHODCALLTYPE TWebf::OnPosRectChange(LPCRECT lprcPosRect)
+HRESULT STDMETHODCALLTYPE WebForm::OnPosRectChange(LPCRECT lprcPosRect)
 {
 	IOleInPlaceObject *iole = NULL;
 	ibrowser->QueryInterface(IID_IOleInPlaceObject, (void**)&iole);

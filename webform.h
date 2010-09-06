@@ -23,7 +23,7 @@
 
 #pragma warning(push)
 #pragma warning(disable:4584)
-class TWebf : public IUnknown, TOleClientSite, TDispatch, TDocHostShowUI, TDocHostUIHandler, TOleInPlaceSite, TOleInPlaceFrame {
+class WebForm : public IUnknown, TOleClientSite, TDispatch, TDocHostShowUI, TDocHostUIHandler, TOleInPlaceSite, TOleInPlaceFrame {
 #pragma warning(pop)
 private:
 	IHTMLDocument2 *GetDoc();
@@ -43,8 +43,8 @@ public:
 
 	WebformDispatchHandler *dispatchHandler;
 
-	TWebf(WebformDispatchHandler *wdh);
-	~TWebf();
+	WebForm(WebformDispatchHandler *wdh);
+	~WebForm();
 	void create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars);
 	void CloseThread();
 	void Close();

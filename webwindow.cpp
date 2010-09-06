@@ -34,7 +34,7 @@ void WebWindow::Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT hei
 		}
 	}
 
-	webForm = new TWebf(webformDispatchHandler);
+	webForm = new WebForm(webformDispatchHandler);
 
 	HWND hWndDesktop = FindWindow("DesktopBackgroundClass", 0);
 

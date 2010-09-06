@@ -15,7 +15,7 @@ private:
 
 public:
 	WebWindow(WebformDispatchHandler *wdh);
-	TWebf *webForm;
+	WebForm *webForm;
 	void Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT height, bool showScrollbars);
 };
 
