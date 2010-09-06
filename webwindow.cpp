@@ -1,5 +1,9 @@
 #include "webwindow.h"
 
+WebWindow::WebWindow(WebformDispatchHandler *wdh) : webformDispatchHandler(wdh)
+{
+}
+
 void WebWindow::Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT height, bool showScrollbars)
 {
 	WNDCLASSEX wcex;
@@ -30,7 +34,7 @@ void WebWindow::Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT hei
 		}
 	}
 
-	webForm = new TWebf();
+	webForm = new TWebf(webformDispatchHandler);
 
 	HWND hWndDesktop = FindWindow("DesktopBackgroundClass", 0);
 

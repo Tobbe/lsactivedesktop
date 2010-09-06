@@ -228,6 +228,14 @@
 				>
 			</File>
 			<File
+				RelativePath=".\webformdispatchhandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath=".\webformdispatchimpl.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\webwindow.cpp"
 				>
 			</File>
@@ -271,6 +279,14 @@
 			</File>
 			<File
 				RelativePath=".\webform.h"
+				>
+			</File>
+			<File
+				RelativePath=".\webformdispatchhandler.h"
+				>
+			</File>
+			<File
+				RelativePath=".\webformdispatchimpl.h"
 				>
 			</File>
 			<File

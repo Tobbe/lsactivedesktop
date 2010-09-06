@@ -11,7 +11,10 @@ private:
 	bool showScrollbars;
 	static LRESULT CALLBACK WebWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
+	WebformDispatchHandler *webformDispatchHandler;
+
 public:
+	WebWindow(WebformDispatchHandler *wdh);
 	TWebf *webForm;
 	void Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT height, bool showScrollbars);
 };

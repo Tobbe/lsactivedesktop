@@ -8,9 +8,9 @@
 #include "TOleClientSite.h"
 #include "toleinplaceframe.h"
 
-TWebf::TWebf() :
+TWebf::TWebf(WebformDispatchHandler *wdh) :
 	ref(1), ibrowser(NULL), cookie(0), isnaving(0), url(NULL), kurl(NULL),
-	hasScrollbars(false), hhost(NULL), hWnd(NULL)
+	hasScrollbars(false), hhost(NULL), hWnd(NULL), dispatchHandler(wdh)
 {
 }
 
@@ -126,6 +126,22 @@ void TCharToWide(const wchar_t *src, wchar_t *dst, int dst_size_in_wchars)
 {
 	#pragma warning(suppress:4996)
 	wcscpy(dst, src);
+}
+
+char *BSTRToLPSTR(BSTR bStr, LPSTR lpstr)
+{
+	int lenW = SysStringLen(bStr);
+	int lenA = WideCharToMultiByte(CP_ACP, 0, bStr, lenW, 0, 0, NULL, NULL);
+
+	if (lenA > 0) {
+		lpstr = new char[lenA + 1]; // allocate a final null terminator as well
+		WideCharToMultiByte(CP_ACP, 0, bStr, lenW, lpstr, lenA, NULL, NULL);
+		lpstr[lenA] = '\0'; // Set the null terminator yourself
+	} else {
+		lpstr = NULL;
+	}
+
+	return lpstr;
 }
 
 void TWebf::Go(const TCHAR *url)
@@ -305,14 +321,31 @@ void TWebf::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrol
 }
 
 HRESULT STDMETHODCALLTYPE TWebf::Invoke(DISPID dispIdMember, REFIID riid,
-	LCID lcid, WORD wFlags, DISPPARAMS *Params, VARIANT *pVarResult,
+	LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult,
 	EXCEPINFO *pExcepInfo, UINT *puArgErr)
 {
 	switch (dispIdMember) { // DWebBrowserEvents2
-		case DISPID_BEFORENAVIGATE2:
+		case DISPID_BEFORENAVIGATE2: {
+			BSTR bstrUrl = pDispParams->rgvarg[5].pvarVal->bstrVal;
+			char *lpstrUrl = NULL;
+
+			lpstrUrl = BSTRToLPSTR(bstrUrl, lpstrUrl);
+			if (lpstrUrl == NULL) {
+				break;
+			}
+
+			std::string url = lpstrUrl;
+			bool cancel;
+
+			dispatchHandler->BeforeNavigate(url, &cancel);
+
+			// Set Cancel parameter to TRUE to cancel the current event
+			*(((*pDispParams).rgvarg)[0].pboolVal) = cancel ? TRUE : FALSE;
+
 			break;
+		}
 		case DISPID_DOCUMENTCOMPLETE:
-			DocumentComplete(Params->rgvarg[0].pvarVal->bstrVal);
+			DocumentComplete(pDispParams->rgvarg[0].pvarVal->bstrVal);
 			break;
 		case DISPID_AMBIENT_DLCONTROL:
 			pVarResult->vt = VT_I4;

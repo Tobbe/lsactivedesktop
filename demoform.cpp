@@ -10,6 +10,7 @@
 #include <string>
 #include <sstream>
 #include "webwindow.h"
+#include "webformdispatchimpl.h"
 
 HINSTANCE hInstance;
 HWND hMain;         // Our main window
@@ -20,6 +21,7 @@ LPCSTR revID = "LSActiveDesktop 0.1 by Tobbe";
 bool loaded;
 LSADSettings settings;
 std::map<std::string, WebWindow*> webWindows;
+WebformDispatchImpl *webformDispatchImpl;
 
 void __cdecl bangNavigate(HWND caller, const char* bangCommandName, const char* args);
 void reportError(LPCSTR msg);
@@ -87,8 +89,10 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 	readSettings();
 
+	webformDispatchImpl = new WebformDispatchImpl();
+
 	for (std::map<std::string, LSADWebWndProp>::iterator it = settings.windowProperties.begin(); it != settings.windowProperties.end(); it++) {
-		webWindows.insert(make_pair(it->first, new WebWindow()));
+		webWindows.insert(std::make_pair(it->first, new WebWindow(webformDispatchImpl)));
 	}
 
 	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
@@ -206,6 +210,8 @@ extern "C" void __cdecl quitModule(HINSTANCE dllInst)
 	for (std::map<std::string, WebWindow*>::iterator it = webWindows.begin(); it != webWindows.end(); it++) {
 		delete it->second;
 	}
+
+	delete webformDispatchImpl;
 
 	if (hMain != NULL)
 	{

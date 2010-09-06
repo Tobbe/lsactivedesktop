@@ -11,6 +11,7 @@
 #include "tdochostuihandler.h"
 #include "tdochostshowui.h"
 #include "tdispatch.h"
+#include "webformdispatchhandler.h"
 
 #define WEBFORM_CLASS (_T("WebformClass"))
 // Create a Webfrom control with CreateWindow(WEBFORM_CLASS,_T("initial-url"),...)
@@ -38,7 +39,9 @@ public:
 	TCHAR *url;               // This was the url that the user just clicked on
 	TCHAR *kurl;              // Key\0Value\0Key2\0Value2\0\0 arguments for the url just clicked on
 
-	TWebf();
+	WebformDispatchHandler *dispatchHandler;
+
+	TWebf(WebformDispatchHandler *wdh);
 	~TWebf();
 	void create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars);
 	void CloseThread();
@@ -55,7 +58,7 @@ public:
 
 	// IDispatch
 	HRESULT STDMETHODCALLTYPE Invoke(DISPID dispIdMember, REFIID riid,
-		LCID lcid, WORD wFlags, DISPPARAMS *Params, VARIANT *pVarResult,
+		LCID lcid, WORD wFlags, DISPPARAMS *pDispParams, VARIANT *pVarResult,
 		EXCEPINFO *pExcepInfo, UINT *puArgErr);
 
 	// IDocHostUIHandler
