@@ -51,7 +51,9 @@ std::string UrlCode::Encode(std::string url)
 		} else if (*pstr == ' ') {
 			*pbuf++ = '+';
 		} else {
-			*pbuf++ = '%', *pbuf++ = ToHex(*pstr >> 4), *pbuf++ = ToHex(*pstr & 15);
+			*pbuf++ = '%';
+			*pbuf++ = ToHex(*pstr >> 4);
+			*pbuf++ = ToHex(*pstr & 15);
 		}
 
 		pstr++;
