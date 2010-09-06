@@ -24,6 +24,7 @@ std::map<std::string, WebWindow*> webWindows;
 WebformDispatchImpl *webformDispatchImpl;
 
 void __cdecl bangNavigate(HWND caller, const char* bangCommandName, const char* args);
+void __cdecl bangRunJSFunction(HWND caller, const char* bangCommandName, const char* args);
 void reportError(LPCSTR msg);
 void readSettings();
 LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -122,6 +123,7 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 		bangName.str("");*/
 	//}
 	AddBangCommandEx("!LSActiveDesktopNavigate", bangNavigate);
+	AddBangCommandEx("!LSActiveDesktopRunJSFunction", bangRunJSFunction);
 
 	// Register message for version info
 	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
@@ -152,6 +154,22 @@ void __cdecl bangNavigate(HWND caller, const char* bangCommandName, const char* 
 	std::string url(token);
 
 	webWindows[name]->webForm->Go(url.c_str());
+}
+
+void __cdecl bangRunJSFunction(HWND caller, const char* bangCommandName, const char* args)
+{
+	const char *tokenStart = args;
+	char token[MAX_LINE_LENGTH + 1];
+	if (!GetToken(tokenStart, token, &tokenStart, false)) {
+		reportError("Wrong bang command syntax");
+	}
+	std::string name(token);
+	if (!GetToken(tokenStart, token, &tokenStart, false)) {
+		reportError("Wrong bang command syntax");
+	}
+	std::string cmd(token);
+
+	webWindows[name]->webForm->RunJSFunction(cmd);
 }
 
 void readSettings()

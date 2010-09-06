@@ -25,6 +25,8 @@
 #pragma warning(disable:4584)
 class TWebf : public IUnknown, TOleClientSite, TDispatch, TDocHostShowUI, TDocHostUIHandler, TOleInPlaceSite, TOleInPlaceFrame {
 #pragma warning(pop)
+private:
+	IHTMLDocument2 *GetDoc();
 public:
 	long ref;
 	unsigned int isnaving;    // bitmask: 4=haven't yet finished Navigate call, 2=haven't yet received DocumentComplete, 1=haven't yet received BeforeNavigate
@@ -47,6 +49,7 @@ public:
 	void CloseThread();
 	void Close();
 	void Go(const TCHAR *fn);
+	void RunJSFunction(std::string cmd);
 	static LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
 	void setupOle();

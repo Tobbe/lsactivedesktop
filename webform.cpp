@@ -167,6 +167,45 @@ void TWebf::Go(const TCHAR *url)
 	isnaving &= ~4;
 }
 
+IHTMLDocument2 *TWebf::GetDoc()
+{
+	IDispatch *dispatch = 0;
+	ibrowser->get_Document(&dispatch);
+	
+	if (dispatch == NULL) {
+		return NULL;
+	}
+
+	IHTMLDocument2 *doc;
+	dispatch->QueryInterface(IID_IHTMLDocument2, (void**)&doc);
+	dispatch->Release();
+	
+	return doc;
+}
+
+void TWebf::RunJSFunction(std::string cmd)
+{
+	IHTMLDocument2 *doc = GetDoc();
+	IHTMLWindow2 *win = NULL;
+	doc->get_parentWindow(&win);
+
+	if (win != NULL) {
+		int lenW = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, cmd.c_str(), -1, NULL, 0);
+		BSTR bstrCmd = SysAllocStringLen(0, lenW);
+		MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, cmd.c_str(), -1, bstrCmd, lenW);
+
+		VARIANT v;
+		VariantInit(&v);
+		win->execScript(bstrCmd, NULL, &v);
+
+		VariantClear(&v);
+		SysFreeString(bstrCmd);
+		win->Release();
+	}
+
+	doc->Release();
+}
+
 void TWebf::DocumentComplete(const wchar_t *)
 {
 	isnaving &= ~2;
