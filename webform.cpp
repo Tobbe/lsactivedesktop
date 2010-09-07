@@ -167,6 +167,28 @@ void WebForm::Go(const TCHAR *url)
 	isnaving &= ~4;
 }
 
+void WebForm::Forward()
+{
+	ibrowser->GoForward();
+}
+
+void WebForm::Back()
+{
+	ibrowser->GoBack();
+}
+
+void WebForm::Refresh(bool clearCache)
+{
+	if (clearCache) {
+		VARIANT v;
+		v.vt = VT_I4;
+		v.lVal = REFRESH_COMPLETELY;
+		ibrowser->Refresh2(&v);
+	} else {
+		ibrowser->Refresh();
+	}
+}
+
 IHTMLDocument2 *WebForm::GetDoc()
 {
 	IDispatch *dispatch = 0;

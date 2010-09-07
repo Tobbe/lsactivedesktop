@@ -9,6 +9,8 @@
 #include <map>
 #include <string>
 #include <sstream>
+#include <cctype>
+#include <algorithm>
 #include "webwindow.h"
 #include "webformdispatchimpl.h"
 
@@ -23,8 +25,7 @@ LSADSettings settings;
 std::map<std::string, WebWindow*> webWindows;
 WebformDispatchImpl *webformDispatchImpl;
 
-void __cdecl bangNavigate(HWND caller, const char* bangCommandName, const char* args);
-void __cdecl bangRunJSFunction(HWND caller, const char* bangCommandName, const char* args);
+void __cdecl bangHandler(HWND caller, const char* bangCommandName, const char* args);
 void reportError(LPCSTR msg);
 void readSettings();
 LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -122,8 +123,12 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 		AddBangCommandEx(bangName.str().c_str(), bangRefreshCache);
 		bangName.str("");*/
 	//}
-	AddBangCommandEx("!LSActiveDesktopNavigate", bangNavigate);
-	AddBangCommandEx("!LSActiveDesktopRunJSFunction", bangRunJSFunction);
+	AddBangCommandEx("!LSActiveDesktopNavigate", bangHandler);
+	AddBangCommandEx("!LSActiveDesktopRunJSFunction", bangHandler);
+	AddBangCommandEx("!LSActiveDesktopForward", bangHandler);
+	AddBangCommandEx("!LSActiveDesktopBack", bangHandler);
+	AddBangCommandEx("!LSActiveDesktopRefresh", bangHandler);
+	AddBangCommandEx("!LSActiveDesktopRefreshCache", bangHandler);
 
 	// Register message for version info
 	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
@@ -132,31 +137,7 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 	return 0;
 }
 
-void __cdecl bangNavigate(HWND caller, const char* bangCommandName, const char* args)
-{
-	/*std::string bangName(bangCommandName);
-	size_t nameLength = bangName.length() - strlen("Navigate");
-	std::string webWindowName = bangName.substr(1, nameLength - 1);
-
-	if (args && args[0] != '\0') {
-		SetWindowText(webWindows[webWindowName]->webForm->hWnd, args);
-	}*/
-
-	const char *tokenStart = args;
-	char token[MAX_LINE_LENGTH + 1];
-	if (!GetToken(tokenStart, token, &tokenStart, false)) {
-		reportError("Wrong bang command syntax");
-	}
-	std::string name(token);
-	if (!GetToken(tokenStart, token, &tokenStart, false)) {
-		reportError("Wrong bang command syntax");
-	}
-	std::string url(token);
-
-	webWindows[name]->webForm->Go(url.c_str());
-}
-
-void __cdecl bangRunJSFunction(HWND caller, const char* bangCommandName, const char* args)
+void __cdecl bangHandler(HWND caller, const char* bangCommandName, const char* args)
 {
 	const char *tokenStart = args;
 	char token[MAX_LINE_LENGTH + 1];
@@ -164,12 +145,33 @@ void __cdecl bangRunJSFunction(HWND caller, const char* bangCommandName, const c
 		reportError("Wrong bang command syntax");
 	}
 	std::string name(token);
-	if (!GetToken(tokenStart, token, &tokenStart, false)) {
-		reportError("Wrong bang command syntax");
-	}
-	std::string cmd(token);
 
-	webWindows[name]->webForm->RunJSFunction(cmd);
+	std::string bangName = bangCommandName;
+	std::transform(bangName.begin(), bangName.end(), bangName.begin(), tolower);
+
+	if (bangName == "!lsactivedesktopnavigate") {
+		if (!GetToken(tokenStart, token, &tokenStart, false)) {
+			reportError("Wrong bang command syntax");
+		}
+		std::string url(token);
+
+		webWindows[name]->webForm->Go(url.c_str());
+	} else if (bangName == "!lsactivedesktoprunjsfunction") {
+		if (!GetToken(tokenStart, token, &tokenStart, false)) {
+			reportError("Wrong bang command syntax");
+		}
+		std::string cmd(token);
+
+		webWindows[name]->webForm->RunJSFunction(cmd);
+	} else if (bangName == "!lsactivedesktopforward") {
+		webWindows[name]->webForm->Forward();
+	} else if (bangName == "!lsactivedesktopback") {
+		webWindows[name]->webForm->Back();
+	} else if (bangName == "!lsactivedesktoprefresh") {
+		webWindows[name]->webForm->Refresh(false);
+	} else if (bangName == "!lsactivedesktoprefreshcache") {
+		webWindows[name]->webForm->Refresh(true);
+	}
 }
 
 void readSettings()

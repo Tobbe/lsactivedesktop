@@ -49,6 +49,9 @@ public:
 	void CloseThread();
 	void Close();
 	void Go(const TCHAR *fn);
+	void Forward();
+	void Back();
+	void Refresh(bool clearCache);
 	void RunJSFunction(std::string cmd);
 	static LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
