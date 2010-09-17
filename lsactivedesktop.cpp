@@ -152,15 +152,18 @@ void __cdecl bangHandler(HWND caller, const char* bangCommandName, const char* a
 	if (bangName == "!lsactivedesktopnavigate") {
 		if (!GetToken(tokenStart, token, &tokenStart, false)) {
 			reportError("Wrong bang command syntax");
+			return;
 		}
 		std::string url(token);
 
 		webWindows[name]->webForm->Go(url.c_str());
 	} else if (bangName == "!lsactivedesktoprunjsfunction") {
-		if (!GetToken(tokenStart, token, &tokenStart, false)) {
+		if (!tokenStart) {
 			reportError("Wrong bang command syntax");
+			return;
 		}
-		std::string cmd(token);
+
+		std::string cmd(tokenStart);
 
 		webWindows[name]->webForm->RunJSFunction(cmd);
 	} else if (bangName == "!lsactivedesktopforward") {
