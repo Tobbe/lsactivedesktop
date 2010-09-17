@@ -4,7 +4,8 @@
 #include <windows.h>
 #include <mshtmhst.h>
 
-struct TDispatch : public IDispatch {
+class TDispatch : public IDispatch {
+public:
 	// IUnknown
 	virtual HRESULT STDMETHODCALLTYPE QueryInterface(REFIID riid,
 		void **ppv) = 0;
