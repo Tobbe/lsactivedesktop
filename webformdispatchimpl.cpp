@@ -3,6 +3,13 @@
 #include "windows.h"
 #include "lsapi.h"
 #include "urlcode.h"
+#include "webform.h"
+#include "jslitestep.h"
+
+WebformDispatchImpl::WebformDispatchImpl(JSLiteStep *jsls)
+{
+	this->jsls = jsls;
+}
 
 void WebformDispatchImpl::BeforeNavigate(std::string url, bool *cancel)
 {
@@ -29,4 +36,9 @@ void WebformDispatchImpl::BeforeNavigate(std::string url, bool *cancel)
 		// Set Cancel parameter to TRUE to cancel the current event
 		*cancel = true;
 	}
+}
+
+void WebformDispatchImpl::NavigateComplete(std::string url, WebForm *webForm)
+{
+	webForm->AddCustomObject(jsls, "LiteStep");
 }

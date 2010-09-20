@@ -13,6 +13,7 @@
 #include <algorithm>
 #include "webwindow.h"
 #include "webformdispatchimpl.h"
+#include "jslitestep.h"
 
 HINSTANCE hInstance;
 HWND hMain;         // Our main window
@@ -23,6 +24,7 @@ LPCSTR revID = "LSActiveDesktop 0.1 by Tobbe";
 bool loaded;
 LSADSettings settings;
 std::map<std::string, WebWindow*> webWindows;
+JSLiteStep *jsLiteStep;
 WebformDispatchImpl *webformDispatchImpl;
 
 void __cdecl bangHandler(HWND caller, const char* bangCommandName, const char* args);
@@ -91,7 +93,9 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 	readSettings();
 
-	webformDispatchImpl = new WebformDispatchImpl();
+	jsLiteStep = new JSLiteStep();
+	jsLiteStep->AddRef();
+	webformDispatchImpl = new WebformDispatchImpl(jsLiteStep);
 
 	for (std::map<std::string, LSADWebWndProp>::iterator it = settings.windowProperties.begin(); it != settings.windowProperties.end(); it++) {
 		webWindows.insert(std::make_pair(it->first, new WebWindow(webformDispatchImpl)));
@@ -235,6 +239,7 @@ extern "C" void __cdecl quitModule(HINSTANCE dllInst)
 	}
 
 	delete webformDispatchImpl;
+	jsLiteStep->Release();
 
 	if (hMain != NULL)
 	{

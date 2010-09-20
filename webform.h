@@ -53,6 +53,7 @@ public:
 	void Back();
 	void Refresh(bool clearCache);
 	void RunJSFunction(std::string cmd);
+	void AddCustomObject(IDispatch *custObj, std::string name);
 	static LRESULT CALLBACK WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
 	void setupOle();

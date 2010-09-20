@@ -2,6 +2,7 @@
 #include <mshtmhst.h>
 #include <mshtmdid.h>
 #include <exdispid.h>
+#include <DispEx.h>
 #include <tchar.h>
 #include <string>
 #include "webform.h"
@@ -228,6 +229,52 @@ void WebForm::RunJSFunction(std::string cmd)
 	doc->Release();
 }
 
+void WebForm::AddCustomObject(IDispatch *custObj, std::string name)
+{
+	IHTMLDocument2 *doc = GetDoc();
+	IHTMLWindow2 *win = NULL;
+	doc->get_parentWindow(&win);
+
+	if (win == NULL) {
+		return;
+	}
+
+	IDispatchEx *winEx;
+	win->QueryInterface(&winEx);
+
+	if (winEx == NULL) {
+		return;
+	}
+
+	int lenW = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, name.c_str(), -1, NULL, 0);
+	BSTR objName = SysAllocStringLen(0, lenW);
+	MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, name.c_str(), -1, objName, lenW);
+
+	DISPID dispid; 
+	HRESULT hr = winEx->GetDispID(objName, fdexNameEnsure, &dispid);
+
+	SysFreeString(objName);
+
+	if (FAILED(hr)) {
+		return;
+	}
+
+	DISPID namedArgs[] = {DISPID_PROPERTYPUT};
+	DISPPARAMS params;
+	params.rgvarg = new VARIANT[1];
+	params.rgvarg[0].pdispVal = custObj;
+	params.rgvarg[0].vt = VT_DISPATCH;
+	params.rgdispidNamedArgs = namedArgs;
+	params.cArgs = 1;
+	params.cNamedArgs = 1;
+
+	hr = winEx->InvokeEx(dispid, LOCALE_USER_DEFAULT, DISPATCH_PROPERTYPUT, &params, NULL, NULL, NULL); 
+
+	if (FAILED(hr)) {
+		return;
+	}
+}
+
 void WebForm::DocumentComplete(const wchar_t *)
 {
 	isnaving &= ~2;
@@ -396,6 +443,8 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 			}
 
 			std::string url = lpstrUrl;
+			delete [] lpstrUrl;
+
 			bool cancel;
 
 			dispatchHandler->BeforeNavigate(url, &cancel);
@@ -408,6 +457,22 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 		case DISPID_DOCUMENTCOMPLETE:
 			DocumentComplete(pDispParams->rgvarg[0].pvarVal->bstrVal);
 			break;
+		case DISPID_NAVIGATECOMPLETE2: {
+			BSTR bstrUrl = pDispParams->rgvarg[0].pvarVal->bstrVal;
+			char *lpstrUrl = NULL;
+
+			lpstrUrl = BSTRToLPSTR(bstrUrl, lpstrUrl);
+			if (lpstrUrl == NULL) {
+				break;
+			}
+
+			std::string url = lpstrUrl;
+			delete [] lpstrUrl;
+
+			dispatchHandler->NavigateComplete(url, this);
+
+			break;
+		}
 		case DISPID_AMBIENT_DLCONTROL:
 			pVarResult->vt = VT_I4;
 			pVarResult->lVal = DLCTL_DLIMAGES | DLCTL_VIDEOS | DLCTL_BGSOUNDS | DLCTL_SILENT;
