@@ -11,6 +11,8 @@ private:
 	static const DISPID DISPID_USER_EXECUTE = DISPID_VALUE + 1;
 	static const DISPID DISPID_USER_WRITEFILE = DISPID_VALUE + 2;
 	static const DISPID DISPID_USER_READFILE = DISPID_VALUE + 3;
+	static const DISPID DISPID_USER_GETEVAR = DISPID_VALUE + 4;
+	static const DISPID DISPID_USER_SETEVAR = DISPID_VALUE + 5;
 
 	std::map<std::wstring, DISPID> idMap;
 	long ref;

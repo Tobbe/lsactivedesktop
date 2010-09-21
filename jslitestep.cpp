@@ -2,12 +2,15 @@
 #include <fstream>
 #include "jslitestep.h"
 #include "lsapi.h"
+#include "atlbase.h"
 
 JSLiteStep::JSLiteStep() : ref(0)
 {
 	idMap.insert(std::make_pair(L"execute", DISPID_USER_EXECUTE));
 	idMap.insert(std::make_pair(L"writefile", DISPID_USER_WRITEFILE));
 	idMap.insert(std::make_pair(L"readfile", DISPID_USER_READFILE));
+	idMap.insert(std::make_pair(L"getevar", DISPID_USER_GETEVAR));
+	idMap.insert(std::make_pair(L"setevar", DISPID_USER_SETEVAR));
 }
 
 HRESULT STDMETHODCALLTYPE JSLiteStep::QueryInterface(REFIID riid, void **ppv)
@@ -122,7 +125,7 @@ HRESULT STDMETHODCALLTYPE JSLiteStep::Invoke(DISPID dispIdMember, REFIID riid,
 				}
 
 				int lenW = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, buffer.c_str(), -1, NULL, 0);
-				BSTR bstrRet = SysAllocStringLen(0, lenW);
+				BSTR bstrRet = SysAllocStringLen(0, lenW - 1);
 				MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, buffer.c_str(), -1, bstrRet, lenW);
 
 				pVarResult->vt = VT_BSTR;
@@ -130,6 +133,23 @@ HRESULT STDMETHODCALLTYPE JSLiteStep::Invoke(DISPID dispIdMember, REFIID riid,
 
 				break;
 			}
+			case DISPID_USER_GETEVAR: {
+				char *buf = new char[MAX_LINE_LENGTH + 1];
+				LSGetVariableEx(args[0].c_str(), buf, MAX_LINE_LENGTH + 1);
+
+				int lenW = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, buf, -1, NULL, 0);
+				BSTR bstrRet = SysAllocStringLen(0, lenW - 1);
+				MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, buf, -1, bstrRet, lenW);
+
+				pVarResult->vt = VT_BSTR;
+				pVarResult->bstrVal = bstrRet;
+
+				break;
+			}
+			case DISPID_USER_SETEVAR:
+				LSSetVariable(args[0].c_str(), args[1].c_str());
+
+				break;
 			default:
 				hr = DISP_E_MEMBERNOTFOUND;
 		}
