@@ -102,7 +102,7 @@
 			Name="Release|Win32"
 			OutputDirectory="$(ConfigurationName)"
 			IntermediateDirectory="$(ConfigurationName)"
-			ConfigurationType="1"
+			ConfigurationType="2"
 			CharacterSet="1"
 			WholeProgramOptimization="1"
 			>
@@ -130,7 +130,7 @@
 				WholeProgramOptimization="false"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;LSACTIVEDESKTOP_EXPORTS"
 				StringPooling="true"
-				ExceptionHandling="0"
+				ExceptionHandling="1"
 				RuntimeLibrary="0"
 				BufferSecurityCheck="false"
 				UsePrecompiledHeader="0"

@@ -19,7 +19,7 @@ HINSTANCE hInstance;
 HWND hMain;         // Our main window
 
 const TCHAR* className = _T("classLSActiveDesktop");
-LPCSTR revID = "LSActiveDesktop 0.1 by Tobbe";
+LPCSTR revID = "LSActiveDesktop 0.4 by Tobbe";
 
 bool loaded;
 LSADSettings settings;
