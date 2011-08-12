@@ -13,6 +13,7 @@ WebformDispatchImpl::WebformDispatchImpl(JSLiteStep *jsls)
 
 void WebformDispatchImpl::BeforeNavigate(std::string url, bool *cancel)
 {
+	*cancel = false;
 	static const std::string lsexconst = "LSEXECUTE://";
 
 	bool lsexecute = true;

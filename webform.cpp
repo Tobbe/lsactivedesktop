@@ -445,7 +445,7 @@ HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
 			std::string url = lpstrUrl;
 			delete [] lpstrUrl;
 
-			bool cancel;
+			bool cancel = false;
 
 			dispatchHandler->BeforeNavigate(url, &cancel);
 
