@@ -11,7 +11,7 @@
 
 WebForm::WebForm(WebformDispatchHandler *wdh) :
 	ref(1), ibrowser(NULL), cookie(0), isnaving(0), url(NULL), kurl(NULL),
-	hasScrollbars(false), hhost(NULL), hWnd(NULL), dispatchHandler(wdh)
+	hasScrollbars(false), hhost(NULL), dispatchHandler(wdh)
 {
 }
 
@@ -335,7 +335,7 @@ LRESULT CALLBACK WebForm::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 {
 	if (msg == WM_NCCREATE) {
 		WebForm *webf = (WebForm*)((LPCREATESTRUCT(lParam))->lpCreateParams);
-		webf->hWnd = hwnd;
+		webf->hhost = hwnd;
 
 		#pragma warning(suppress:4244)
 		SetWindowLongPtr(hwnd, 0, (LONG_PTR)webf);
@@ -360,7 +360,7 @@ LRESULT WebForm::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 			CREATESTRUCT *cs = (CREATESTRUCT*)lParam;
 
 			if (cs->style & (WS_HSCROLL | WS_VSCROLL)) {
-				SetWindowLongPtr(hWnd, GWL_STYLE, cs->style & ~(WS_HSCROLL | WS_VSCROLL));
+				SetWindowLongPtr(hhost, GWL_STYLE, cs->style & ~(WS_HSCROLL | WS_VSCROLL));
 			}
 
 			break;
@@ -368,7 +368,7 @@ LRESULT WebForm::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_DESTROY:
 			Close();
 			Release();
-			SetWindowLongPtr(hWnd, 0, 0);
+			SetWindowLongPtr(hhost, 0, 0);
 			break;
 		case WM_SETTEXT:
 			Go((TCHAR*)lParam);
@@ -381,19 +381,19 @@ LRESULT WebForm::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		case WM_PAINT: {
 			PAINTSTRUCT ps;
-			BeginPaint(hWnd, &ps);
+			BeginPaint(hhost, &ps);
 			HBRUSH brush = CreateSolidBrush(RGB(255, 255, 255));
 
 			FillRect(ps.hdc, &ps.rcPaint, brush);
 
 			DeleteObject(brush);
-			EndPaint(hWnd, &ps);
+			EndPaint(hhost, &ps);
 
 			return 0;
 		}
 	}
 
-	return DefWindowProc(hWnd, msg, wParam, lParam);
+	return DefWindowProc(hhost, msg, wParam, lParam);
 }
 
 void WebForm::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScrollbars)
@@ -417,13 +417,11 @@ void WebForm::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScr
 		}
 	}
 
-	hWnd = CreateWindow(
+	hhost = CreateWindow(
 		WEBFORM_CLASS,
 		_T("http://tlundberg.com"),
 		WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
 		0, 0, 100, 100, hWndParent, (HMENU)(LONG_PTR)id, hInstance, (LPVOID)this);
-
-	hhost = hWnd;
 
 	setupOle();
 }

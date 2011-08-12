@@ -31,7 +31,6 @@ public:
 	long ref;
 	unsigned int isnaving;    // bitmask: 4=haven't yet finished Navigate call, 2=haven't yet received DocumentComplete, 1=haven't yet received BeforeNavigate
 
-	HWND hWnd;
 	UINT id;
 	HWND hhost;               // This is the window that hosts us
 	IWebBrowser2 *ibrowser;   // Our pointer to the browser itself. Released in Close().

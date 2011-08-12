@@ -86,8 +86,8 @@ LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 			break;
 		}
 		case WM_SIZE:
-			if (webForm->hWnd) {
-				MoveWindow(webForm->hWnd, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
+			if (webForm->hhost) {
+				MoveWindow(webForm->hhost, 0, 0, LOWORD(lParam), HIWORD(lParam), TRUE);
 			}
 
 			break;
