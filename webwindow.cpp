@@ -15,7 +15,7 @@ void WebWindow::Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT hei
 	WNDCLASSEX wcex;
 	static const char *className = "WebWindowClass";
 
-	this->hInstWebWindow = hInstance;
+	this->hInstance = hInstance;
 	this->showScrollbars = showScrollbars;
 
 	if (!GetClassInfoEx(hInstance, className, &wcex)) {
@@ -64,30 +64,30 @@ void WebWindow::Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT hei
 LRESULT CALLBACK WebWindow::WebWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_NCCREATE) {
-		WebWindow *webw = (WebWindow*)((LPCREATESTRUCT(lParam))->lpCreateParams);
-		webw->hWndWebWindow = hWnd;
+		WebWindow *webWindow = (WebWindow*)((LPCREATESTRUCT(lParam))->lpCreateParams);
+		webWindow->hWndWebWindow = hWnd;
 
 		#pragma warning(suppress:4244)
-		SetWindowLongPtr(hWnd, 0, (LONG_PTR)webw);
+		SetWindowLongPtr(hWnd, 0, (LONG_PTR)webWindow);
 
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
 	#pragma warning(suppress:4312)
-	WebWindow *webw = (WebWindow*)GetWindowLongPtr(hWnd, 0);
+	WebWindow *webWindow = (WebWindow*)GetWindowLongPtr(hWnd, 0);
 
-	if (webw == NULL) {
+	if (webWindow == NULL) {
 		return DefWindowProc(hWnd, msg, wParam, lParam);
 	}
 
-	return webw->InstanceWndProc(msg, wParam, lParam);
+	return webWindow->InstanceWndProc(msg, wParam, lParam);
 }
 
 LRESULT WebWindow::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	switch (msg) {
 		case WM_CREATE: {
-			webForm->create(hWndWebWindow, hInstWebWindow, 103, showScrollbars);
+			webForm->create(hWndWebWindow, hInstance, 103, showScrollbars);
 
 			break;
 		}

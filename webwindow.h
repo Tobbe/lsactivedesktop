@@ -9,7 +9,7 @@ class WebformDispatchHandler;
 class WebWindow {
 private:
 	HWND hWndWebWindow;
-	HINSTANCE hInstWebWindow;
+	HINSTANCE hInstance;
 	bool showScrollbars;
 	static LRESULT CALLBACK WebWindowWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 	LRESULT InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam);
