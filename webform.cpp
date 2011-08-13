@@ -339,13 +339,13 @@ LRESULT CALLBACK WebForm::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 		webf->hhost = hwnd;
 
 		#pragma warning(suppress:4244)
-		SetWindowLongPtr(hwnd, 0, (LONG_PTR)webf);
+		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)webf);
 
 		return DefWindowProc(hwnd, msg, wParam, lParam);
 	}
 
 	#pragma warning(suppress:4312)
-	WebForm *webf = (WebForm*)GetWindowLongPtr(hwnd, 0);
+	WebForm *webf = (WebForm*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
 
 	if (webf == NULL) {
 		return DefWindowProc(hwnd, msg, wParam, lParam);
@@ -369,7 +369,7 @@ LRESULT WebForm::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		case WM_DESTROY:
 			Close();
 			Release();
-			SetWindowLongPtr(hhost, 0, 0);
+			SetWindowLongPtr(hhost, GWLP_USERDATA, 0);
 			break;
 		case WM_SETTEXT:
 			Go((TCHAR*)lParam);
