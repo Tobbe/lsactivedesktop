@@ -5,13 +5,13 @@
 #include <exdisp.h>
 #include <windows.h>
 #include <mshtmhst.h>
+#include <string>
 #include "toleclientsite.h"
 #include "toleinplacesite.h"
 #include "toleinplaceframe.h"
 #include "tdochostuihandler.h"
 #include "tdochostshowui.h"
 #include "tdispatch.h"
-#include "webformdispatchhandler.h"
 
 #define WEBFORM_CLASS (_T("WebformClass"))
 // Create a Webfrom control with CreateWindow(WEBFORM_CLASS,_T("initial-url"),...)
@@ -20,6 +20,8 @@
 #define WEBFN_LOADED 3
 // This notification is sent via WM_COMMAND when you have called WebformGo(hWebF, url).
 // It indicates that the page has finished loading.
+
+class WebformDispatchHandler;
 
 #pragma warning(push)
 #pragma warning(disable:4584)
