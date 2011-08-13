@@ -1,8 +1,13 @@
 #include "webwindow.h"
 #include "webform.h"
 
-WebWindow::WebWindow(WebformDispatchHandler *wdh) : webformDispatchHandler(wdh)
+WebWindow::WebWindow(WebformDispatchHandler *wdh) : webForm(NULL), webformDispatchHandler(wdh)
 {
+}
+
+WebWindow::~WebWindow()
+{
+	delete webForm;
 }
 
 void WebWindow::Create(HINSTANCE hInstance, UINT x, UINT y, UINT width, UINT height, bool showScrollbars)
