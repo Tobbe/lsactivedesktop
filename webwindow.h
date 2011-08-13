@@ -2,7 +2,9 @@
 #define _WEB_WINDOW_H__
 
 #include <windows.h>
-#include "webform.h"
+
+class WebForm;
+class WebformDispatchHandler;
 
 class WebWindow {
 private:

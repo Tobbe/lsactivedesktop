@@ -1,4 +1,5 @@
 #include "webwindow.h"
+#include "webform.h"
 
 WebWindow::WebWindow(WebformDispatchHandler *wdh) : webformDispatchHandler(wdh)
 {
