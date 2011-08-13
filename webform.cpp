@@ -11,7 +11,7 @@
 #include "webformdispatchhandler.h"
 
 WebForm::WebForm(WebformDispatchHandler *wdh) :
-	ref(1), ibrowser(NULL), cookie(0), isnaving(0), url(NULL), kurl(NULL),
+	ref(0), ibrowser(NULL), cookie(0), isnaving(0), url(NULL), kurl(NULL),
 	hasScrollbars(false), hhost(NULL), dispatchHandler(wdh)
 {
 }
@@ -338,6 +338,13 @@ LRESULT CALLBACK WebForm::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 		WebForm *webf = (WebForm*)((LPCREATESTRUCT(lParam))->lpCreateParams);
 		webf->hhost = hwnd;
 		webf->setupOle();
+		if (webf->ibrowser == 0) {
+			MessageBox(NULL, "web->ibrowser is NULL", "WM_CREATE", MB_OK);
+			delete webf;
+			webf = NULL;
+		} else {
+			webf->AddRef();
+		}
 
 		#pragma warning(suppress:4244)
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)webf);
