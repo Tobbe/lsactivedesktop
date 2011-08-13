@@ -337,6 +337,7 @@ LRESULT CALLBACK WebForm::WebformWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPA
 	if (msg == WM_NCCREATE) {
 		WebForm *webf = (WebForm*)((LPCREATESTRUCT(lParam))->lpCreateParams);
 		webf->hhost = hwnd;
+		webf->setupOle();
 
 		#pragma warning(suppress:4244)
 		SetWindowLongPtr(hwnd, GWLP_USERDATA, (LONG_PTR)webf);
@@ -423,8 +424,6 @@ void WebForm::create(HWND hWndParent, HINSTANCE hInstance, UINT id, bool showScr
 		_T("http://tlundberg.com"),
 		WS_CHILD | WS_CLIPSIBLINGS | WS_VISIBLE,
 		0, 0, 100, 100, hWndParent, (HMENU)(LONG_PTR)id, hInstance, (LPVOID)this);
-
-	setupOle();
 }
 
 HRESULT STDMETHODCALLTYPE WebForm::Invoke(DISPID dispIdMember, REFIID riid,
