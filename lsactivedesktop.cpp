@@ -112,21 +112,6 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 	ShowWindow(hMain, SW_SHOW);
 
-	/*for (std::map<std::string, LSADWebWndProp>::iterator it = settings.windowProperties.begin(); it != settings.windowProperties.end(); it++) {
-		std::ostringstream bangName;
-		bangName << "!" << it->first << "Navigate";
-		AddBangCommandEx(bangName.str().c_str(), bangNavigate);
-		bangName.str("");*/
-		/*bangName << "!" << it->first << "Forward";
-		AddBangCommandEx(bangName.str().c_str(), bangForward);
-		bangName.str("");
-		bangName << "!" << it->first << "Refresh";
-		AddBangCommandEx(bangName.str().c_str(), bangRefresh);
-		bangName.str("");
-		bangName << "!" << it->first << "RefreshCache";
-		AddBangCommandEx(bangName.str().c_str(), bangRefreshCache);
-		bangName.str("");*/
-	//}
 	AddBangCommandEx("!LSActiveDesktopNavigate", bangHandler);
 	AddBangCommandEx("!LSActiveDesktopRunJSFunction", bangHandler);
 	AddBangCommandEx("!LSActiveDesktopForward", bangHandler);
@@ -206,13 +191,6 @@ void readSettings()
 
 		settings.windowProperties.insert(make_pair(name, props));
 	}
-	/*settings.unmuteOnVolUp = GetRCBoolDef("tVolEzyUnmuteOnVolUp", TRUE) != FALSE;
-	settings.unmuteOnVolDown = GetRCBoolDef("tVolEzyUnmuteOnVolDown", FALSE) != FALSE;
-	char buffer[1024];
-	GetRCString("tVolEzyVolumeChangedCommand", buffer, "!none", 1024);
-	settings.volumeChangedCommand = buffer;
-	GetRCString("tVolEzyMuteChangedCommand", buffer, "!none", 1024);
-	settings.muteChangedCommand = buffer;*/
 }
 
 void reportError(LPCSTR msg)
