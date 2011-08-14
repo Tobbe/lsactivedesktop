@@ -14,18 +14,19 @@
 #include "webwindow.h"
 #include "webformdispatchimpl.h"
 #include "jslitestep.h"
+#include "lsad.h"
 
 HINSTANCE hInstance;
 HWND hMain;         // Our main window
+HWND hWndLSAD;      // Window to send messages to for communication
+                    // with the web forms
 
 const TCHAR* className = _T("classLSActiveDesktop");
 LPCSTR revID = "LSActiveDesktop 0.4 by Tobbe";
 
 bool loaded;
 LSADSettings settings;
-std::map<std::string, WebWindow*> webWindows;
-JSLiteStep *jsLiteStep;
-WebformDispatchImpl *webformDispatchImpl;
+LSAD *lsad = NULL;
 
 void __cdecl bangHandler(HWND caller, const char* bangCommandName, const char* args);
 void reportError(LPCSTR msg);
@@ -48,18 +49,14 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 			readSettings();
 
 			return 0;
-		case WM_CREATE:
-			for (std::map<std::string, WebWindow*>::iterator it = webWindows.begin(); it != webWindows.end(); it++) {
-				int x = settings.windowProperties[it->first].x;
-				int y = settings.windowProperties[it->first].y;
-				int width = settings.windowProperties[it->first].width;
-				int height = settings.windowProperties[it->first].height;
-				std::string url = settings.windowProperties[it->first].url;
-				bool showScrollbars = settings.windowProperties[it->first].showScrollbars;
-				it->second->Create(hInstance, x, y, width, height, showScrollbars);
-				it->second->webForm->Go(url.c_str());
-				y += 400;
-			}
+		case WM_LSADCREATED:
+			hWndLSAD = (HWND)wParam;
+			AddBangCommandEx("!LSActiveDesktopNavigate", bangHandler);
+			AddBangCommandEx("!LSActiveDesktopRunJSFunction", bangHandler);
+			AddBangCommandEx("!LSActiveDesktopForward", bangHandler);
+			AddBangCommandEx("!LSActiveDesktopBack", bangHandler);
+			AddBangCommandEx("!LSActiveDesktopRefresh", bangHandler);
+			AddBangCommandEx("!LSActiveDesktopRefreshCache", bangHandler);
 			break;
 	}
 
@@ -69,7 +66,6 @@ LRESULT CALLBACK PlainWndProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
 extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR szPath)
 {
 	hInstance = dllInst;
-	OleInitialize(0);
 
 	WNDCLASSEX wcex;
 	ZeroMemory(&wcex, sizeof(wcex));
@@ -93,16 +89,8 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 
 	readSettings();
 
-	jsLiteStep = new JSLiteStep();
-	jsLiteStep->AddRef();
-	webformDispatchImpl = new WebformDispatchImpl(jsLiteStep);
-
-	for (std::map<std::string, LSADWebWndProp>::iterator it = settings.windowProperties.begin(); it != settings.windowProperties.end(); it++) {
-		webWindows.insert(std::make_pair(it->first, new WebWindow(webformDispatchImpl)));
-	}
-
-	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
-		1000, 700, 200, 200, HWND_MESSAGE, NULL, hInstance, NULL);
+	hMain = CreateWindowEx(0, className, _T("WindowLSActiveDesktop"), 0, 0, 0,
+		0, 0, HWND_MESSAGE, NULL, hInstance, NULL);
 
 	if (hMain == NULL) {
 		reportError("Error creating LSActiveDesktop window");
@@ -110,18 +98,14 @@ extern "C" int __cdecl initModuleEx(HWND parentWnd, HINSTANCE dllInst, LPCSTR sz
 		return 1;
 	}
 
-	ShowWindow(hMain, SW_SHOW);
-
-	AddBangCommandEx("!LSActiveDesktopNavigate", bangHandler);
-	AddBangCommandEx("!LSActiveDesktopRunJSFunction", bangHandler);
-	AddBangCommandEx("!LSActiveDesktopForward", bangHandler);
-	AddBangCommandEx("!LSActiveDesktopBack", bangHandler);
-	AddBangCommandEx("!LSActiveDesktopRefresh", bangHandler);
-	AddBangCommandEx("!LSActiveDesktopRefreshCache", bangHandler);
-
 	// Register message for version info
 	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
 	SendMessage(GetLitestepWnd(), LM_REGISTERMESSAGE, (WPARAM)hMain, (LPARAM)msgs);
+
+	lsad = new LSAD(hInstance, hMain, &settings);
+
+	DWORD tID;
+	HANDLE hThread = CreateThread(NULL, 0, LSAD::ThreadEntry, lsad, 0, &tID);
 
 	return 0;
 }
@@ -134,6 +118,10 @@ void __cdecl bangHandler(HWND caller, const char* bangCommandName, const char* a
 		reportError("Wrong bang command syntax");
 	}
 	std::string name(token);
+	WPARAM wParamName = reinterpret_cast<WPARAM>(new std::string(name));
+	LPARAM lParamArgs = 0L;
+
+	UINT msg = 0;
 
 	std::string bangName = bangCommandName;
 	std::transform(bangName.begin(), bangName.end(), bangName.begin(), tolower);
@@ -141,35 +129,40 @@ void __cdecl bangHandler(HWND caller, const char* bangCommandName, const char* a
 	if (bangName == "!lsactivedesktopnavigate") {
 		if (!GetToken(tokenStart, token, &tokenStart, false)) {
 			reportError("Wrong bang command syntax");
+			delete reinterpret_cast<std::string*>(wParamName);
 			return;
 		}
 		std::string url(token);
 
-		webWindows[name]->webForm->Go(url.c_str());
+		lParamArgs = reinterpret_cast<LPARAM>(new std::string(url));
+		msg = LSAD_BANGNAVIGATE;
 	} else if (bangName == "!lsactivedesktoprunjsfunction") {
 		if (!tokenStart) {
 			reportError("Wrong bang command syntax");
+			delete reinterpret_cast<std::string*>(wParamName);
 			return;
 		}
 
 		std::string cmd(tokenStart);
 
-		webWindows[name]->webForm->RunJSFunction(cmd);
+		lParamArgs = reinterpret_cast<LPARAM>(new std::string(cmd));
+		msg = LSAD_BANGRUNJSFUNCTION;
 	} else if (bangName == "!lsactivedesktopforward") {
-		webWindows[name]->webForm->Forward();
+		msg = LSAD_BANGFORWARD;
 	} else if (bangName == "!lsactivedesktopback") {
-		webWindows[name]->webForm->Back();
+		msg = LSAD_BANGBACK;
 	} else if (bangName == "!lsactivedesktoprefresh") {
-		webWindows[name]->webForm->Refresh(false);
+		msg = LSAD_BANGREFRESH;
 	} else if (bangName == "!lsactivedesktoprefreshcache") {
-		webWindows[name]->webForm->Refresh(true);
+		msg = LSAD_BANGREFRESHCACHE;
 	}
+
+	PostMessage(hWndLSAD, msg, wParamName, lParamArgs);
 }
 
 void readSettings()
 {
 	settings.showErrors = GetRCBoolDef("LSActiveDesktopShowErrors", TRUE) != FALSE;
-	settings.showScrollbars = !(GetRCBool("LSActiveDesktopHideScrollbars", TRUE) != FALSE);
 
 	char line[MAX_LINE_LENGTH + 1];
 	const char *tokenStart = line;
@@ -213,12 +206,7 @@ extern "C" void __cdecl quitModule(HINSTANCE dllInst)
 	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
 	SendMessage(GetLitestepWnd(), LM_UNREGISTERMESSAGE, (WPARAM)hMain, (LPARAM)msgs);
 
-	for (std::map<std::string, WebWindow*>::iterator it = webWindows.begin(); it != webWindows.end(); it++) {
-		delete it->second;
-	}
-
-	delete webformDispatchImpl;
-	jsLiteStep->Release();
+	delete lsad;
 
 	if (hMain != NULL)
 	{
@@ -227,5 +215,4 @@ extern "C" void __cdecl quitModule(HINSTANCE dllInst)
 	}
 
 	UnregisterClass(className, dllInst);
-	OleUninitialize();
 }

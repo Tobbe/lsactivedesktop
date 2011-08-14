@@ -204,6 +204,10 @@
 				>
 			</File>
 			<File
+				RelativePath=".\lsad.cpp"
+				>
+			</File>
+			<File
 				RelativePath=".\tdispatch.cpp"
 				>
 			</File>
@@ -259,6 +263,10 @@
 			</File>
 			<File
 				RelativePath=".\lsactivedesktop.h"
+				>
+			</File>
+			<File
+				RelativePath=".\lsad.h"
 				>
 			</File>
 			<File
