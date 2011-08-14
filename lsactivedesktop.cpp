@@ -118,6 +118,7 @@ void __cdecl bangHandler(HWND caller, const char* bangCommandName, const char* a
 		reportError("Wrong bang command syntax");
 	}
 	std::string name(token);
+	std::transform(name.begin(), name.end(), name.begin(), tolower);
 	WPARAM wParamName = reinterpret_cast<WPARAM>(new std::string(name));
 	LPARAM lParamArgs = 0L;
 
@@ -170,6 +171,7 @@ void readSettings()
 	GetRCLine("LSActiveDesktopWebWindows", line, MAX_LINE_LENGTH + 1, NULL);
 	while (GetToken(tokenStart, token, &tokenStart, false)) {
 		std::string name(token);
+		std::transform(name.begin(), name.end(), name.begin(), tolower);
 
 		LSADWebWndProp props;
 		props.x = GetRCCoordinate((name + "X").c_str(), 0, GetSystemMetrics(SM_CXVIRTUALSCREEN));
