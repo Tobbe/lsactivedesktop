@@ -226,10 +226,11 @@ void reportError(LPCSTR msg)
 extern "C" void __cdecl quitModule(HINSTANCE dllInst)
 {
 	RemoveBangCommand("!LSActiveDesktopNavigate");
-	/*RemoveBangCommand("!LSActiveDesktopBack");
+	RemoveBangCommand("!LSActiveDesktopRunJSFunction");
+	RemoveBangCommand("!LSActiveDesktopBack");
 	RemoveBangCommand("!LSActiveDesktopForward");
 	RemoveBangCommand("!LSActiveDesktopRefresh");
-	RemoveBangCommand("!LSActiveDesktopRefreshCache");*/
+	RemoveBangCommand("!LSActiveDesktopRefreshCache");
 
 	UINT msgs[] = {LM_GETREVID, LM_REFRESH, 0};
 	SendMessage(GetLitestepWnd(), LM_UNREGISTERMESSAGE, (WPARAM)hMain, (LPARAM)msgs);
