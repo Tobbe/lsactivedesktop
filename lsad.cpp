@@ -137,7 +137,9 @@ LRESULT LSAD::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		case LSAD_BANGNAVIGATE: {
 			std::string *name = reinterpret_cast<std::string*>(wParam);
 			std::string *url = reinterpret_cast<std::string*>(lParam);
-			webWindows[*name]->webForm->Go(url->c_str());
+			if (webWindows[*name]) {
+				webWindows[*name]->webForm->Go(url->c_str());
+			}
 			delete url;
 			delete name;
 
@@ -145,14 +147,18 @@ LRESULT LSAD::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case LSAD_BANGBACK: {
 			std::string *name = reinterpret_cast<std::string*>(wParam);
-			webWindows[*name]->webForm->Back();
+			if (webWindows[*name]) {
+				webWindows[*name]->webForm->Back();
+			}
 			delete name;
 
 			break;
 		}
 		case LSAD_BANGFORWARD: {
 			std::string *name = reinterpret_cast<std::string*>(wParam);
-			webWindows[*name]->webForm->Forward();
+			if (webWindows[*name]) {
+				webWindows[*name]->webForm->Forward();
+			}
 			delete name;
 
 			break;
@@ -160,7 +166,9 @@ LRESULT LSAD::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		case LSAD_BANGRUNJSFUNCTION: {
 			std::string *name = reinterpret_cast<std::string*>(wParam);
 			std::string *cmd = reinterpret_cast<std::string*>(lParam);
-			webWindows[*name]->webForm->RunJSFunction(*cmd);
+			if (webWindows[*name]) {
+				webWindows[*name]->webForm->RunJSFunction(*cmd);
+			}
 			delete cmd;
 			delete name;
 
@@ -168,14 +176,18 @@ LRESULT LSAD::InstanceWndProc(UINT msg, WPARAM wParam, LPARAM lParam)
 		}
 		case LSAD_BANGREFRESH: {
 			std::string *name = reinterpret_cast<std::string*>(wParam);
-			webWindows[*name]->webForm->Refresh(false);
+			if (webWindows[*name]) {
+				webWindows[*name]->webForm->Refresh(false);
+			}
 			delete name;
 
 			break;
 		}
 		case LSAD_BANGREFRESHCACHE: {
 			std::string *name = reinterpret_cast<std::string*>(wParam);
-			webWindows[*name]->webForm->Refresh(true);
+			if (webWindows[*name]) {
+				webWindows[*name]->webForm->Refresh(true);
+			}
 			delete name;
 
 			break;
